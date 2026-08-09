@@ -1,80 +1,147 @@
+# ============================================================
 # WoolKey — Apache .htaccess
-# Requires mod_rewrite, mod_headers, mod_expires
+# cPanel / Apache / PHP 8.3
+# ============================================================
 
-# ── HTTPS redirect ────────────────────────────────────────────
+
+# ------------------------------------------------------------
+# HTTPS redirect
+# ------------------------------------------------------------
+
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteCond %{HTTPS} off
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    RewriteEngine On
+
+    # Redirect all HTTP traffic to HTTPS
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 
-# ── 404 handler ───────────────────────────────────────────────
+
+# ------------------------------------------------------------
+# Custom 404 page
+# ------------------------------------------------------------
+
 ErrorDocument 404 /404.html
 
-# ── MIME types ────────────────────────────────────────────────
+
+# ------------------------------------------------------------
+# MIME types
+# ------------------------------------------------------------
+
 <IfModule mod_mime.c>
-  AddType application/javascript           .js
-  AddType text/css                         .css
-  AddType image/svg+xml                    .svg
-  AddType application/manifest+json        .webmanifest
-  AddType text/html                        .html
-  AddType image/png                        .png
-  AddType image/x-icon                     .ico
+    AddType application/manifest+json .webmanifest
+    AddType image/svg+xml .svg
 </IfModule>
 
-# ── Security headers ──────────────────────────────────────────
+
+# ------------------------------------------------------------
+# Security headers
+# ------------------------------------------------------------
+
 <IfModule mod_headers.c>
-  Header always set X-Content-Type-Options "nosniff"
-  Header always set X-Frame-Options "DENY"
-  Header always set Referrer-Policy "no-referrer"
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
-  Header always set Cross-Origin-Opener-Policy "same-origin"
-  Header always set Cross-Origin-Resource-Policy "same-origin"
 
-  # Content Security Policy — no outbound connections
-  Header always set Content-Security-Policy "\
-    default-src 'self'; \
-    script-src 'self'; \
-    style-src 'self'; \
-    img-src 'self' data:; \
-    font-src 'self'; \
-    connect-src 'none'; \
-    media-src 'none'; \
-    object-src 'none'; \
-    frame-src 'none'; \
-    frame-ancestors 'none'; \
-    base-uri 'self'; \
-    form-action 'self'; \
-    upgrade-insecure-requests"
+    # Prevent MIME-type sniffing
+    Header always set X-Content-Type-Options "nosniff"
 
-  # HSTS — enable only after verifying HTTPS is working
-  # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    # Prevent this site from being embedded in frames
+    Header always set X-Frame-Options "DENY"
 
-  # Remove server fingerprinting headers if possible
-  Header always unset X-Powered-By
-  Header always unset Server
+    # Referrer privacy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Disable unnecessary browser features
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+
+    # Remove PHP fingerprint where possible
+    Header always unset X-Powered-By
+
+    # Content Security Policy
+    #
+    # This assumes JavaScript, CSS, fonts, etc. are hosted locally.
+    # connect-src 'none' prevents JavaScript from making network/API requests.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+
+    # Enable this ONLY after HTTPS is confirmed working correctly.
+    # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+
 </IfModule>
 
-# ── Cache control ─────────────────────────────────────────────
+
+# ------------------------------------------------------------
+# Cache control
+# ------------------------------------------------------------
+
 <IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresDefault "access plus 1 hour"
 
-  # HTML — short cache so updates propagate quickly
-  ExpiresByType text/html                       "access plus 5 minutes"
+    ExpiresActive On
 
-  # Versioned assets can be cached longer
-  ExpiresByType application/javascript          "access plus 7 days"
-  ExpiresByType text/css                        "access plus 7 days"
-  ExpiresByType image/svg+xml                   "access plus 30 days"
-  ExpiresByType image/png                       "access plus 30 days"
-  ExpiresByType application/manifest+json       "access plus 1 day"
+    # Default
+    ExpiresDefault "access plus 1 day"
+
+    # HTML - short cache
+    ExpiresByType text/html "access plus 5 minutes"
+
+    # CSS / JavaScript
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript "access plus 7 days"
+
+    # Images
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType image/x-icon "access plus 30 days"
+
+    # Fonts
+    ExpiresByType font/woff2 "access plus 30 days"
+    ExpiresByType font/woff "access plus 30 days"
+
+    # Web manifest
+    ExpiresByType application/manifest+json "access plus 1 day"
+
 </IfModule>
 
-# ── Prevent directory listing ──────────────────────────────────
+
+# ------------------------------------------------------------
+# Prevent directory listing
+# ------------------------------------------------------------
+
 Options -Indexes
 
-# ── Block access to sensitive files ───────────────────────────
-<FilesMatch "(^\.|\.git|\.htpasswd|\.env)">
-  Require all denied
+
+# ------------------------------------------------------------
+# Block sensitive / hidden files
+# ------------------------------------------------------------
+
+# Protect common configuration / repository files.
+#
+# IMPORTANT:
+# The original Copilot regex used (^.|...)
+# That "." matches ANY character and could accidentally block everything.
+
+<FilesMatch "(^\.ht|^\.env|^\.git|\.ini$|\.log$|composer\.(json|lock)$|package(-lock)?\.json$)">
+    Require all denied
 </FilesMatch>
+
+
+# ------------------------------------------------------------
+# Prevent access to common backup/source files
+# ------------------------------------------------------------
+
+<FilesMatch "\.(bak|backup|old|orig|save|swp|sql|dist)$">
+    Require all denied
+</FilesMatch>
+
+
+# ------------------------------------------------------------
+# PHP 8.3 — cPanel generated handler
+# DO NOT EDIT this section through .htaccess if cPanel manages it
+# ------------------------------------------------------------
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+    AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
