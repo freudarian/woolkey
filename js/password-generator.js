@@ -6,15 +6,31 @@
 
 'use strict';
 
-function generatePassword(options) {
-  const CHAR_SETS = {
-    lowercase: 'abcdefghijklmnopqrstuvwxyz',
-    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    numbers:   '0123456789',
-    symbols:   '!@#$%^&*()-_=+[]{};:,.?',
-  };
-  const AMBIGUOUS_CHARS = '0O1Il5S8B';
+// These constants are internal to this script file.
+// eslint-disable-next-line no-var
+var _PW_CHAR_SETS = {
+  lowercase: 'abcdefghijklmnopqrstuvwxyz',
+  uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  numbers:   '0123456789',
+  symbols:   '!@#$%^&*()-_=+[]{};:,.?',
+};
+// eslint-disable-next-line no-var
+var _PW_AMBIGUOUS = '0O1Il5S8B';
 
+/**
+ * Generate a secure password.
+ *
+ * @param {object} options
+ * @param {number}  options.length            - Password length (8–128)
+ * @param {boolean} options.includeLowercase
+ * @param {boolean} options.includeUppercase
+ * @param {boolean} options.includeNumbers
+ * @param {boolean} options.includeSymbols
+ * @param {boolean} options.avoidAmbiguous    - Exclude ambiguous characters
+ * @param {string}  [options.excludedCharacters] - Extra characters to exclude
+ * @returns {string} Generated password
+ */
+function generatePassword(options) {
   const {
     length = 16,
     includeLowercase = true,
@@ -31,26 +47,26 @@ function generatePassword(options) {
 
   const excluded = new Set([
     ...excludedCharacters,
-    ...(avoidAmbiguous ? AMBIGUOUS_CHARS : ''),
+    ...(avoidAmbiguous ? _PW_AMBIGUOUS : ''),
   ]);
 
   const filter = (str) => str.split('').filter((c) => !excluded.has(c)).join('');
 
   const groups = [];
   if (includeLowercase) {
-    const set = filter(CHAR_SETS.lowercase);
+    const set = filter(_PW_CHAR_SETS.lowercase);
     if (set.length > 0) groups.push(set);
   }
   if (includeUppercase) {
-    const set = filter(CHAR_SETS.uppercase);
+    const set = filter(_PW_CHAR_SETS.uppercase);
     if (set.length > 0) groups.push(set);
   }
   if (includeNumbers) {
-    const set = filter(CHAR_SETS.numbers);
+    const set = filter(_PW_CHAR_SETS.numbers);
     if (set.length > 0) groups.push(set);
   }
   if (includeSymbols) {
-    const set = filter(CHAR_SETS.symbols);
+    const set = filter(_PW_CHAR_SETS.symbols);
     if (set.length > 0) groups.push(set);
   }
 
@@ -84,13 +100,6 @@ function generatePassword(options) {
  * @returns {number}
  */
 function passwordPoolSize(options) {
-  const CHAR_SETS = {
-    lowercase: 'abcdefghijklmnopqrstuvwxyz',
-    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    numbers:   '0123456789',
-    symbols:   '!@#$%^&*()-_=+[]{};:,.?',
-  };
-  const AMBIGUOUS_CHARS = '0O1Il5S8B';
   const {
     includeLowercase = true,
     includeUppercase = true,
@@ -102,14 +111,14 @@ function passwordPoolSize(options) {
 
   const excluded = new Set([
     ...excludedCharacters,
-    ...(avoidAmbiguous ? AMBIGUOUS_CHARS : ''),
+    ...(avoidAmbiguous ? _PW_AMBIGUOUS : ''),
   ]);
   const filter = (str) => str.split('').filter((c) => !excluded.has(c)).join('');
 
   let pool = '';
-  if (includeLowercase) pool += filter(CHAR_SETS.lowercase);
-  if (includeUppercase) pool += filter(CHAR_SETS.uppercase);
-  if (includeNumbers)   pool += filter(CHAR_SETS.numbers);
-  if (includeSymbols)   pool += filter(CHAR_SETS.symbols);
+  if (includeLowercase) pool += filter(_PW_CHAR_SETS.lowercase);
+  if (includeUppercase) pool += filter(_PW_CHAR_SETS.uppercase);
+  if (includeNumbers)   pool += filter(_PW_CHAR_SETS.numbers);
+  if (includeSymbols)   pool += filter(_PW_CHAR_SETS.symbols);
   return pool.length;
 }

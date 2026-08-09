@@ -6,14 +6,25 @@
 
 'use strict';
 
-function generatePassphrase(options) {
-  const SEPARATORS = {
-    hyphen: '-',
-    underscore: '_',
-    dot: '.',
-    space: ' ',
-  };
+// eslint-disable-next-line no-var
+var _PP_SEPARATORS = {
+  hyphen: '-',
+  underscore: '_',
+  dot: '.',
+  space: ' ',
+};
 
+/**
+ * Generate a secure passphrase.
+ *
+ * @param {object} options
+ * @param {number}  options.wordCount         - Number of words (4–8)
+ * @param {string}  options.separator         - 'hyphen'|'underscore'|'dot'|'space'
+ * @param {boolean} options.capitalize        - Capitalize first letter of each word
+ * @param {boolean} options.addNumber         - Append a two-digit number suffix (00–99)
+ * @returns {string} Generated passphrase
+ */
+function generatePassphrase(options) {
   const {
     wordCount = 4,
     separator = 'hyphen',
@@ -28,7 +39,7 @@ function generatePassphrase(options) {
     throw new Error('Word list is not loaded');
   }
 
-  const sep = SEPARATORS[separator] !== undefined ? SEPARATORS[separator] : '-';
+  const sep = _PP_SEPARATORS[separator] !== undefined ? _PP_SEPARATORS[separator] : '-';
   const words = [];
 
   for (let i = 0; i < wordCount; i++) {
@@ -42,7 +53,8 @@ function generatePassphrase(options) {
   let passphrase = words.join(sep);
 
   if (addNumber) {
-    passphrase += sep + secureRandomInt(100);
+    const num = secureRandomInt(100);
+    passphrase += sep + String(num).padStart(2, '0');
   }
 
   return passphrase;
