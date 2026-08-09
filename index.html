@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WoolKey — Strong passwords. Made privately.</title>
+  <meta name="description" content="WoolKey generates secure passwords and passphrases entirely in your browser. Nothing is ever sent to our servers.">
+  <meta name="theme-color" content="#0f1117">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo" aria-label="WoolKey home">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="13" stroke="#7c6aff" stroke-width="2"/>
+      <path d="M8 14a6 6 0 1 1 12 0" stroke="#7c6aff" stroke-width="2" stroke-linecap="round"/>
+      <rect x="11" y="14" width="6" height="7" rx="1.5" fill="#7c6aff"/>
+      <circle cx="14" cy="17.5" r="1" fill="#fff"/>
+    </svg>
+    <span>
+      WoolKey
+      <div class="logo-tagline">by CoolerSheep</div>
+    </span>
+  </a>
+  <nav class="site-nav" aria-label="Site navigation">
+    <a href="/privacy.html">Privacy</a>
+    <a href="/security.html">Security</a>
+  </nav>
+</header>
+
+<main id="main-content">
+  <div class="card">
+    <!-- Mode toggle -->
+    <div class="mode-toggle" role="group" aria-label="Generator mode">
+      <button id="mode-password" class="active" aria-pressed="true">Password</button>
+      <button id="mode-passphrase" aria-pressed="false">Passphrase</button>
+    </div>
+
+    <!-- Output -->
+    <div class="output-wrapper" aria-live="polite" aria-label="Generated output">
+      <span id="output" tabindex="0" role="textbox" aria-readonly="true" aria-label="Generated password or passphrase"></span>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="regen-btn" class="btn btn-primary" aria-label="Generate new password">
+        ↺ Generate
+      </button>
+      <button id="copy-btn" class="btn btn-outline" aria-label="Copy to clipboard">
+        ⎘ Copy
+      </button>
+      <button id="toggle-visibility" class="btn btn-outline" aria-pressed="false" aria-label="Hide password">
+        Hide
+      </button>
+      <span id="copy-feedback" class="copy-feedback" role="status" aria-live="polite">Copied!</span>
+    </div>
+
+    <!-- Strength indicator -->
+    <div class="strength-track" aria-hidden="true">
+      <div id="strength-bar" class="strength-bar level-0" style="width:0%"></div>
+    </div>
+    <div class="strength-row">
+      <span id="entropy-display" class="entropy-display">Estimated entropy: —</span>
+      <span id="strength-label" class="strength-label level-0" aria-live="polite">—</span>
+    </div>
+
+    <!-- Password options panel -->
+    <div id="password-panel" class="options-section" aria-label="Password options">
+      <h2>Options</h2>
+      <div class="option-row">
+        <label for="length">Length</label>
+        <input type="range" id="length" min="8" max="128" value="16" step="1" aria-valuemin="8" aria-valuemax="128" aria-valuenow="16">
+        <span id="length-value" class="option-value" aria-live="polite">16</span>
+      </div>
+      <div class="toggle-group" role="group" aria-label="Character types">
+        <label class="chk-label">
+          <input type="checkbox" id="chk-lower" checked> a–z
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" id="chk-upper" checked> A–Z
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" id="chk-numbers" checked> 0–9
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" id="chk-symbols"> !@#…
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" id="chk-ambiguous"> Avoid ambiguous
+        </label>
+      </div>
+      <div class="field-row">
+        <label for="exclude-chars">Exclude characters</label>
+        <input type="text" id="exclude-chars" placeholder="e.g. @#&" autocomplete="off" spellcheck="false" aria-label="Characters to exclude from password">
+      </div>
+    </div>
+
+    <!-- Passphrase options panel (hidden initially) -->
+    <div id="passphrase-panel" class="options-section" aria-label="Passphrase options" hidden>
+      <h2>Options</h2>
+      <div class="option-row">
+        <label for="word-count">Words</label>
+        <input type="range" id="word-count" min="4" max="8" value="4" step="1" aria-valuemin="4" aria-valuemax="8" aria-valuenow="4">
+        <span id="word-count-value" class="option-value" aria-live="polite">4</span>
+      </div>
+      <div class="field-row">
+        <label for="separator">Separator</label>
+        <select id="separator" aria-label="Word separator">
+          <option value="hyphen">Hyphen  ( - )</option>
+          <option value="underscore">Underscore  ( _ )</option>
+          <option value="dot">Dot  ( . )</option>
+          <option value="space">Space</option>
+        </select>
+      </div>
+      <div class="toggle-group" role="group" aria-label="Passphrase options">
+        <label class="chk-label">
+          <input type="checkbox" id="chk-capitalize"> Capitalize
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" id="chk-add-number"> Add number
+        </label>
+      </div>
+    </div>
+
+    <p class="privacy-badge">
+      <strong>Generated locally.</strong> Nothing leaves your browser.
+    </p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <span>© 2025 CoolerSheep</span>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/security.html">Security</a>
+</footer>
+
+<!-- Scripts — no external dependencies -->
+<script src="/js/crypto-random.js"></script>
+<script src="/js/entropy.js"></script>
+<script src="/data/words.js"></script>
+<script src="/js/password-generator.js"></script>
+<script src="/js/passphrase-generator.js"></script>
+<script src="/js/clipboard.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

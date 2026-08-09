@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security — WoolKey</title>
+  <meta name="description" content="WoolKey security model: Web Crypto API, entropy calculation, CSP, and offline behavior explained.">
+  <meta name="theme-color" content="#0f1117">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="logo" aria-label="WoolKey home">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="13" stroke="#7c6aff" stroke-width="2"/>
+      <path d="M8 14a6 6 0 1 1 12 0" stroke="#7c6aff" stroke-width="2" stroke-linecap="round"/>
+      <rect x="11" y="14" width="6" height="7" rx="1.5" fill="#7c6aff"/>
+      <circle cx="14" cy="17.5" r="1" fill="#fff"/>
+    </svg>
+    <span>WoolKey</span>
+  </a>
+  <nav class="site-nav" aria-label="Site navigation">
+    <a href="/privacy.html">Privacy</a>
+    <a href="/security.html" aria-current="page">Security</a>
+  </nav>
+</header>
+
+<article class="prose" aria-label="Security model">
+  <h1>Security</h1>
+  <p>WoolKey is built on well-established cryptographic foundations with no custom crypto.</p>
+
+  <h2>Web Crypto API</h2>
+  <p>All randomness comes exclusively from <code>crypto.getRandomValues()</code>, the browser's
+  cryptographically secure pseudorandom number generator (CSPRNG). <code>Math.random()</code>
+  is never used. If the Web Crypto API is unavailable, generation is blocked — there is no
+  insecure fallback.</p>
+
+  <h2>Rejection sampling (no modulo bias)</h2>
+  <p>When selecting characters or words, WoolKey uses <em>rejection sampling</em> to ensure
+  every item in the pool has exactly equal probability. A naive modulo operation introduces
+  bias when the pool size does not evenly divide the random integer range; WoolKey avoids
+  this entirely.</p>
+
+  <h2>Fisher–Yates shuffle</h2>
+  <p>After guaranteeing at least one character from each enabled character class, the result
+  array is shuffled using the Fisher–Yates algorithm, implemented with
+  <code>crypto.getRandomValues()</code>. This ensures no positional bias.</p>
+
+  <h2>Entropy model</h2>
+  <p>Entropy estimates are calculated as:</p>
+  <ul>
+    <li><strong>Password:</strong> <code>length × log₂(pool size)</code></li>
+    <li><strong>Passphrase:</strong> <code>words × log₂(word list size)</code></li>
+  </ul>
+  <p>The word list contains approximately 1,100 words. A 4-word passphrase provides roughly
+  40 bits of entropy; a 6-word passphrase provides roughly 61 bits; an 8-word passphrase
+  provides roughly 81 bits.</p>
+  <p>Strength labels correspond to entropy ranges:</p>
+  <ul>
+    <li><strong>Weak</strong> — below 40 bits</li>
+    <li><strong>Fair</strong> — 40–59 bits</li>
+    <li><strong>Strong</strong> — 60–79 bits</li>
+    <li><strong>Very strong</strong> — 80–99 bits</li>
+    <li><strong>Excellent</strong> — 100+ bits</li>
+  </ul>
+
+  <h2>Content Security Policy</h2>
+  <p>WoolKey's Apache configuration sets a strict CSP that includes
+  <code>connect-src 'none'</code>. This prevents the browser from making any outbound
+  network requests from JavaScript — even if malicious code were somehow injected, it
+  could not exfiltrate data.</p>
+
+  <h2>No server-side processing</h2>
+  <p>Apache serves only static files. Generation happens entirely in the browser. The server
+  never sees your passwords.</p>
+
+  <h2>Offline support</h2>
+  <p>After the first visit, WoolKey's service worker caches all static assets. The application
+  runs fully offline. Only static files are cached — generated passwords are never stored.</p>
+
+  <h2>HTTPS requirement</h2>
+  <p>WoolKey requires HTTPS. HTTP requests are redirected automatically via
+  <code>.htaccess</code>. The Web Crypto API is available only in secure contexts (HTTPS or
+  localhost).</p>
+</article>
+
+<footer class="site-footer">
+  <span>© 2025 CoolerSheep</span>
+  <a href="/">Home</a>
+  <a href="/privacy.html">Privacy</a>
+</footer>
+</body>
+</html>
