@@ -1,0 +1,80 @@
+# WoolKey — Apache .htaccess
+# Requires mod_rewrite, mod_headers, mod_expires
+
+# ── HTTPS redirect ────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# ── 404 handler ───────────────────────────────────────────────
+ErrorDocument 404 /404.html
+
+# ── MIME types ────────────────────────────────────────────────
+<IfModule mod_mime.c>
+  AddType application/javascript           .js
+  AddType text/css                         .css
+  AddType image/svg+xml                    .svg
+  AddType application/manifest+json        .webmanifest
+  AddType text/html                        .html
+  AddType image/png                        .png
+  AddType image/x-icon                     .ico
+</IfModule>
+
+# ── Security headers ──────────────────────────────────────────
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "no-referrer"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Resource-Policy "same-origin"
+
+  # Content Security Policy — no outbound connections
+  Header always set Content-Security-Policy "\
+    default-src 'self'; \
+    script-src 'self'; \
+    style-src 'self'; \
+    img-src 'self' data:; \
+    font-src 'self'; \
+    connect-src 'none'; \
+    media-src 'none'; \
+    object-src 'none'; \
+    frame-src 'none'; \
+    frame-ancestors 'none'; \
+    base-uri 'self'; \
+    form-action 'self'; \
+    upgrade-insecure-requests"
+
+  # HSTS — enable only after verifying HTTPS is working
+  # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+
+  # Remove server fingerprinting headers if possible
+  Header always unset X-Powered-By
+  Header always unset Server
+</IfModule>
+
+# ── Cache control ─────────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+
+  # HTML — short cache so updates propagate quickly
+  ExpiresByType text/html                       "access plus 5 minutes"
+
+  # Versioned assets can be cached longer
+  ExpiresByType application/javascript          "access plus 7 days"
+  ExpiresByType text/css                        "access plus 7 days"
+  ExpiresByType image/svg+xml                   "access plus 30 days"
+  ExpiresByType image/png                       "access plus 30 days"
+  ExpiresByType application/manifest+json       "access plus 1 day"
+</IfModule>
+
+# ── Prevent directory listing ──────────────────────────────────
+Options -Indexes
+
+# ── Block access to sensitive files ───────────────────────────
+<FilesMatch "(^\.|\.git|\.htpasswd|\.env)">
+  Require all denied
+</FilesMatch>

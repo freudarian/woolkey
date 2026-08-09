@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy — WoolKey</title>
+  <meta name="description" content="WoolKey privacy policy. Passwords are generated locally and never leave your device.">
+  <meta name="theme-color" content="#0f1117">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="logo" aria-label="WoolKey home">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="13" stroke="#7c6aff" stroke-width="2"/>
+      <path d="M8 14a6 6 0 1 1 12 0" stroke="#7c6aff" stroke-width="2" stroke-linecap="round"/>
+      <rect x="11" y="14" width="6" height="7" rx="1.5" fill="#7c6aff"/>
+      <circle cx="14" cy="17.5" r="1" fill="#fff"/>
+    </svg>
+    <span>WoolKey</span>
+  </a>
+  <nav class="site-nav" aria-label="Site navigation">
+    <a href="/privacy.html" aria-current="page">Privacy</a>
+    <a href="/security.html">Security</a>
+  </nav>
+</header>
+
+<article class="prose" aria-label="Privacy policy">
+  <h1>Privacy</h1>
+  <p>WoolKey was designed around a single principle: <strong>your passwords are yours alone.</strong></p>
+
+  <h2>What we collect</h2>
+  <p>Nothing. WoolKey has no backend, no database, no user accounts, and no analytics.</p>
+
+  <h2>Local generation only</h2>
+  <p>Every password and passphrase is generated entirely inside your browser using the
+  <a href="/security.html">Web Crypto API</a>. The generated values never leave your device — not to
+  our servers, not to any third party, not anywhere.</p>
+
+  <h2>No storage</h2>
+  <p>WoolKey does not store generated passwords in:</p>
+  <ul>
+    <li><code>localStorage</code></li>
+    <li><code>sessionStorage</code></li>
+    <li><code>IndexedDB</code></li>
+    <li>Cookies</li>
+    <li>URLs</li>
+    <li>Server logs</li>
+  </ul>
+  <p>When you close or navigate away from the page, the generated password is gone.</p>
+
+  <h2>No external resources</h2>
+  <p>WoolKey loads no external scripts, fonts, stylesheets, analytics, or tracking pixels. The
+  Content Security Policy enforces <code>connect-src 'none'</code>, which means the browser
+  cannot make any outbound network connections from WoolKey's JavaScript.</p>
+
+  <h2>Service worker</h2>
+  <p>WoolKey includes a service worker for offline support. It caches only static assets
+  (HTML, CSS, JavaScript, the word list). Generated passwords are never cached.</p>
+
+  <h2>Server logs</h2>
+  <p>Your web server (Apache) may record standard HTTP access logs including your IP address and
+  the pages you visit. These are standard server-level logs and are not related to password
+  generation.</p>
+
+  <h2>Contact</h2>
+  <p>Questions? <a href="https://coolersheep.com">CoolerSheep</a></p>
+</article>
+
+<footer class="site-footer">
+  <span>© 2025 CoolerSheep</span>
+  <a href="/">Home</a>
+  <a href="/security.html">Security</a>
+</footer>
+</body>
+</html>
