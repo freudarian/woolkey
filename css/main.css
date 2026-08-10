@@ -65,13 +65,14 @@ a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; 
 .logo {
   display: inline-flex;
   align-items: center;
+  gap: 0.6rem;
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--color-text);
   text-decoration: none;
 }
+.logo img { flex-shrink: 0; display: block; }
 .logo:hover { text-decoration: none; }
-.site-nav { display: flex; gap: 1.25rem; font-size: 0.9rem; flex-wrap: wrap; }
 .theme-switcher {
   display: inline-flex;
   align-items: center;
