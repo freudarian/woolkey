@@ -108,6 +108,25 @@ ErrorDocument 404 /404.html
 
 
 # ------------------------------------------------------------
+# Service worker must never be served stale
+# ------------------------------------------------------------
+
+# ExpiresByType would give this a 7-day max-age like any other .js file, but
+# the service worker is the mechanism that ships every other update — a stale
+# copy pins visitors to an old build.
+
+<Files "service-worker.js">
+    <IfModule mod_expires.c>
+        ExpiresActive Off
+    </IfModule>
+    <IfModule mod_headers.c>
+        Header always set Cache-Control "no-cache, must-revalidate"
+        Header always unset Expires
+    </IfModule>
+</Files>
+
+
+# ------------------------------------------------------------
 # Prevent directory listing
 # ------------------------------------------------------------
 

@@ -6,7 +6,11 @@
 
 'use strict';
 
-const CACHE_NAME = 'woolkey-v2';
+// Bump on every deploy. The fetch handler is cache-first with no revalidation,
+// so a returning visitor keeps serving the old bundle until this string
+// changes: that is what triggers the browser to install a new worker, populate
+// a fresh cache, and drop the previous one in activate.
+const CACHE_NAME = 'woolkey-v3';
 const BASE_PATH = self.location.pathname.replace(/[^/]+$/, '');
 function assetPath(path) {
   return BASE_PATH + path;
@@ -21,9 +25,11 @@ const STATIC_ASSETS = [
   assetPath('css/main.css'),
   assetPath('js/site.js'),
   assetPath('js/crypto-random.js'),
+  assetPath('js/user-entropy.js'),
   assetPath('js/entropy.js'),
   assetPath('js/password-generator.js'),
   assetPath('js/passphrase-generator.js'),
+  assetPath('js/agent-api.js'),
   assetPath('js/clipboard.js'),
   assetPath('js/ui.js'),
   assetPath('js/app.js'),
