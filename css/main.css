@@ -56,7 +56,7 @@ a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; 
   color: var(--color-text);
   text-decoration: none;
 }
-.logo svg { flex-shrink: 0; }
+.logo img { flex-shrink: 0; display: block; }
 .logo-tagline { font-size: 0.8rem; font-weight: 400; color: var(--color-muted); margin-top: -2px; }
 .site-nav { display: flex; gap: 1.25rem; font-size: 0.9rem; flex-wrap: wrap; }
 
