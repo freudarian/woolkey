@@ -14,6 +14,9 @@
     # Redirect all HTTP traffic to HTTPS
     RewriteCond %{HTTPS} !=on
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # API endpoint
+    RewriteRule ^api/generate/?$ api/generate.php [L,QSA]
 </IfModule>
 
 
@@ -120,7 +123,7 @@ Options -Indexes
 # The original Copilot regex used (^.|...)
 # That "." matches ANY character and could accidentally block everything.
 
-<FilesMatch "(^\.ht|^\.env|^\.git|\.ini$|\.log$|composer\.(json|lock)$|package(-lock)?\.json$)">
+<FilesMatch "(^\.ht|^\.env|^\.git|\.ini$|\.log$|composer\.(json|lock)$|package(-lock)?\.json$|config\.php$|config\.example\.php$)">
     Require all denied
 </FilesMatch>
 

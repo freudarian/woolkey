@@ -1,0 +1,16 @@
+# Block direct access to config.php
+<Files "config.php">
+    Require all denied
+</Files>
+
+# Deny all access except to generate.php
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+<Files "generate.php">
+    Require all granted
+</Files>
+
+# No directory listing
+Options -Indexes
