@@ -66,10 +66,10 @@ function updateToggleLabel() {
   if (!btn) return;
   const eyeOff = document.getElementById('icon-eye-off');
   const eye    = document.getElementById('icon-eye');
-  // hidden=true  → password is masked  → show closed-eye (eye-off) so user can click to reveal
-  // hidden=false → password is visible → show open-eye so user can click to hide
-  if (eyeOff) eyeOff.hidden = !_hidden;
-  if (eye)    eye.hidden    =  _hidden;
+  // _hidden=true  → password masked   → show closed-eye so user can click to reveal
+  // _hidden=false → password visible  → show open-eye so user can click to hide
+  if (eyeOff) eyeOff.style.display = _hidden  ? '' : 'none';
+  if (eye)    eye.style.display    = _hidden  ? 'none' : '';
   btn.setAttribute('aria-label', _hidden ? 'Show password' : 'Hide password');
   btn.setAttribute('aria-pressed', String(!_hidden));
 }
