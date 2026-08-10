@@ -6,26 +6,31 @@
 
 'use strict';
 
-const CACHE_NAME = 'woolkey-v1';
+const CACHE_NAME = 'woolkey-v2';
+const BASE_PATH = self.location.pathname.replace(/[^/]+$/, '');
+function assetPath(path) {
+  return BASE_PATH + path;
+}
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/privacy.html',
-  '/security.html',
-  '/offline.html',
-  '/404.html',
-  '/css/main.css',
-  '/js/crypto-random.js',
-  '/js/entropy.js',
-  '/js/password-generator.js',
-  '/js/passphrase-generator.js',
-  '/js/clipboard.js',
-  '/js/ui.js',
-  '/js/app.js',
-  '/data/words.js',
-  '/manifest.webmanifest',
-  '/assets/favicon.png',
-  '/assets/logo.gif',
+  assetPath(''),
+  assetPath('index.html'),
+  assetPath('privacy.html'),
+  assetPath('security.html'),
+  assetPath('offline.html'),
+  assetPath('404.html'),
+  assetPath('css/main.css'),
+  assetPath('js/site.js'),
+  assetPath('js/crypto-random.js'),
+  assetPath('js/entropy.js'),
+  assetPath('js/password-generator.js'),
+  assetPath('js/passphrase-generator.js'),
+  assetPath('js/clipboard.js'),
+  assetPath('js/ui.js'),
+  assetPath('js/app.js'),
+  assetPath('data/words.js'),
+  assetPath('manifest.webmanifest'),
+  assetPath('assets/favicon.png'),
+  assetPath('assets/logo.gif'),
 ];
 
 self.addEventListener('install', (event) => {
@@ -69,7 +74,7 @@ self.addEventListener('fetch', (event) => {
       }).catch(() => {
         // Offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('/offline.html');
+          return caches.match(assetPath('offline.html'));
         }
         return new Response('', { status: 503 });
       });

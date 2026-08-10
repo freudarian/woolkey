@@ -11,14 +11,16 @@
 </head>
 <body>
 <header class="site-header">
-  <a href="./" class="logo" aria-label="WoolKey home">
-    <img src="assets/logo.gif" alt="" width="28" height="28">
-    <span>WoolKey</span>
-  </a>
+  <a href="./" class="logo" aria-label="WoolKey home">WoolKey</a>
   <nav class="site-nav" aria-label="Site navigation">
     <a href="privacy.html" aria-current="page">Privacy</a>
     <a href="security.html">Security</a>
   </nav>
+  <div class="theme-switcher" role="group" aria-label="Theme">
+    <button type="button" class="theme-btn" data-theme-choice="light" aria-label="Light mode" title="Light mode">☀️</button>
+    <button type="button" class="theme-btn" data-theme-choice="dark" aria-label="Dark mode" title="Dark mode">🌙</button>
+    <button type="button" class="theme-btn" data-theme-choice="system" aria-label="System theme" title="System theme">💻</button>
+  </div>
 </header>
 
 <article class="prose" aria-label="Privacy policy">
@@ -64,9 +66,10 @@
 </article>
 
 <footer class="site-footer">
-  <span>© 2025 CoolerSheep</span>
+  <span>© <span data-current-year></span> CoolerSheep</span>
   <a href="./">Home</a>
   <a href="security.html">Security</a>
 </footer>
+<script src="js/site.js"></script>
 </body>
 </html>
