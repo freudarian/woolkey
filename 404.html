@@ -9,7 +9,12 @@
 </head>
 <body>
 <header class="site-header">
-  <a href="./" class="logo"><img src="assets/logo.gif" alt="" width="28" height="28"><span>WoolKey</span></a>
+  <a href="./" class="logo">WoolKey</a>
+  <div class="theme-switcher" role="group" aria-label="Theme">
+    <button type="button" class="theme-btn" data-theme-choice="light" aria-label="Light mode" title="Light mode">☀️</button>
+    <button type="button" class="theme-btn" data-theme-choice="dark" aria-label="Dark mode" title="Dark mode">🌙</button>
+    <button type="button" class="theme-btn" data-theme-choice="system" aria-label="System theme" title="System theme">💻</button>
+  </div>
 </header>
 <main class="error-page">
   <h1>Page not found</h1>
@@ -17,7 +22,8 @@
   <a href="./" class="btn btn-primary">Go home</a>
 </main>
 <footer class="site-footer">
-  <span>© 2025 CoolerSheep</span>
+  <span>© <span data-current-year></span> CoolerSheep</span>
 </footer>
+<script src="js/site.js"></script>
 </body>
 </html>

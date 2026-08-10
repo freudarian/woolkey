@@ -2,8 +2,12 @@
   "name": "WoolKey",
   "short_name": "WoolKey",
   "description": "Strong passwords. Made privately.",
-  "start_url": "/",
+  "id": "/woolkey/",
+  "start_url": "/woolkey/",
+  "scope": "/woolkey/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
   "background_color": "#0f1117",
   "theme_color": "#7c6aff",
   "icons": [
