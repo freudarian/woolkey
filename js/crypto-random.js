@@ -23,6 +23,13 @@ function secureRandomInt(maxExclusive) {
   let value;
   do {
     crypto.getRandomValues(buf);
+    // Optional defense-in-depth: mix collected user entropy into bytes.
+    if (typeof userEntropyWord === 'function') {
+      for (let i = 0; i < bytesNeeded; i++) {
+        const w = userEntropyWord() >>> 0;
+        buf[i] ^= ((w >>> ((i % 4) * 8)) & 0xff);
+      }
+    }
     value = 0;
     for (let i = 0; i < bytesNeeded; i++) {
       value = value * 256 + buf[i];

@@ -28,6 +28,9 @@
   cryptographically secure pseudorandom number generator (CSPRNG). <code>Math.random()</code>
   is never used. If the Web Crypto API is unavailable, generation is blocked — there is no
   insecure fallback.</p>
+  <p>WoolKey also mixes optional user-generated timing/interaction entropy (mouse, touch,
+  pointer, and keyboard timing) into generated random bytes as defense-in-depth. Web Crypto
+  remains the primary entropy source.</p>
 
   <h2>Rejection sampling (no modulo bias)</h2>
   <p>When selecting characters or words, WoolKey uses <em>rejection sampling</em> to ensure
