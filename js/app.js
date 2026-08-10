@@ -94,8 +94,9 @@ function init() {
 
   // Initial state
   setMode('password');
-  updateLengthDisplay(UI.lengthSlider?.value ?? 16);
+  updateLengthDisplay(UI.lengthSlider?.value ?? 24);
   updateWordCountDisplay(UI.wordCountSlider?.value ?? 4);
+  updateToggleLabel();
   generate();
 }
 
