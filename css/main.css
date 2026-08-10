@@ -224,12 +224,19 @@ main {
   overflow: hidden;
   margin-bottom: 0.4rem;
 }
+/* The CSP sets style-src 'self', which blocks style attributes in the markup,
+   so these two starting states have to live here. JavaScript setting
+   element.style.* later is CSSOM and stays permitted.
+   Without them the bar flashes full-width red, and both eye icons show, until
+   the first script runs. */
 .strength-bar {
   height: 100%;
+  width: 0;
   border-radius: 99px;
   transition: width 0.3s ease, background 0.3s ease;
   background: var(--s0);
 }
+#icon-eye { display: none; }
 .strength-bar.level-0 { background: var(--s0); }
 .strength-bar.level-1 { background: var(--s1); }
 .strength-bar.level-2 { background: var(--s2); }
@@ -371,6 +378,15 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+/* Page-title variant. This lives here rather than in a style attribute because
+   the site CSP sets style-src 'self', which blocks inline styles outright. */
+.ai-star-title {
+  width: 0.9em;
+  height: 0.9em;
+  color: var(--color-primary);
+  margin-right: 0.15em;
 }
 
 .prose h3 {
