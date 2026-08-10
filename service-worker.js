@@ -15,6 +15,11 @@ const BASE_PATH = self.location.pathname.replace(/[^/]+$/, '');
 function assetPath(path) {
   return BASE_PATH + path;
 }
+// The ?v=4 tokens are a one-off flush for browsers that cached these files
+// under the old 7-day expiry. CSS and JS now carry Cache-Control: no-cache, so
+// they revalidate on their own — the token does not need bumping again, but it
+// must stay identical to the HTML references or the page and this cache will
+// ask for two different URLs.
 const STATIC_ASSETS = [
   assetPath(''),
   assetPath('index.html'),
@@ -23,19 +28,19 @@ const STATIC_ASSETS = [
   assetPath('api.html'),
   assetPath('offline.html'),
   assetPath('404.html'),
-  assetPath('css/main.css'),
-  assetPath('js/site.js'),
-  assetPath('js/crypto-random.js'),
-  assetPath('js/user-entropy.js'),
-  assetPath('js/entropy.js'),
-  assetPath('js/password-generator.js'),
-  assetPath('js/passphrase-generator.js'),
-  assetPath('js/agent-api.js'),
-  assetPath('js/api-doc.js'),
-  assetPath('js/clipboard.js'),
-  assetPath('js/ui.js'),
-  assetPath('js/app.js'),
-  assetPath('data/words.js'),
+  assetPath('css/main.css?v=4'),
+  assetPath('js/site.js?v=4'),
+  assetPath('js/crypto-random.js?v=4'),
+  assetPath('js/user-entropy.js?v=4'),
+  assetPath('js/entropy.js?v=4'),
+  assetPath('js/password-generator.js?v=4'),
+  assetPath('js/passphrase-generator.js?v=4'),
+  assetPath('js/agent-api.js?v=4'),
+  assetPath('js/api-doc.js?v=4'),
+  assetPath('js/clipboard.js?v=4'),
+  assetPath('js/ui.js?v=4'),
+  assetPath('js/app.js?v=4'),
+  assetPath('data/words.js?v=4'),
   assetPath('manifest.webmanifest'),
   assetPath('assets/favicon.png'),
   assetPath('assets/logo.gif'),

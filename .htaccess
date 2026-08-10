@@ -85,10 +85,12 @@ ErrorDocument 404 /404.html
     # HTML - short cache
     ExpiresByType text/html "access plus 5 minutes"
 
-    # CSS / JavaScript
-    ExpiresByType text/css "access plus 7 days"
-    ExpiresByType application/javascript "access plus 7 days"
-    ExpiresByType text/javascript "access plus 7 days"
+    # CSS / JavaScript — see the revalidation block below. Asset URLs carry no
+    # version token, so a long expiry means a returning visitor keeps running
+    # last week's stylesheet and scripts after a deploy.
+    ExpiresByType text/css "access plus 0 seconds"
+    ExpiresByType application/javascript "access plus 0 seconds"
+    ExpiresByType text/javascript "access plus 0 seconds"
 
     # Images
     ExpiresByType image/svg+xml "access plus 30 days"
@@ -105,6 +107,25 @@ ErrorDocument 404 /404.html
     ExpiresByType application/manifest+json "access plus 1 day"
 
 </IfModule>
+
+
+# ------------------------------------------------------------
+# CSS / JavaScript freshness
+# ------------------------------------------------------------
+
+# These filenames never change and carry no ?v= token, so a long max-age means
+# a deploy does not reach anyone who has visited before until it expires.
+#
+# "no-cache" does not mean "do not store" — the browser still keeps the file
+# and still revalidates with If-None-Match, so an unchanged asset costs one
+# empty 304 rather than a full download. Correctness over a few bytes.
+
+<FilesMatch "\.(css|js)$">
+    <IfModule mod_headers.c>
+        Header always set Cache-Control "no-cache, must-revalidate"
+        Header always unset Expires
+    </IfModule>
+</FilesMatch>
 
 
 # ------------------------------------------------------------
