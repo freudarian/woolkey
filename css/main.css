@@ -356,6 +356,186 @@ main {
   font-size: 0.88em;
 }
 
+/* ── API page ────────────────────────────────────────────────── */
+
+/* The AI sparkle that marks anything agent-facing. Inherits the link colour
+   via currentColor so it works in both themes and on hover. */
+.ai-star {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  fill: currentColor;
+  vertical-align: -0.125em;
+}
+.link-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.prose h3 {
+  font-size: 1rem;
+  margin: 1.25rem 0 0.4rem;
+  color: var(--color-text);
+}
+.prose strong { color: var(--color-text); }
+
+/* Answer box — the one thing a reader is most likely to be looking for. */
+.answer-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.answer-box p:last-child { margin-bottom: 0; }
+.answer-box .answer-lead {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.callout {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.1rem;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+.callout p:last-child { margin-bottom: 0; }
+.callout-warn   { border-left: 3px solid var(--color-warn); }
+.callout-danger { border-left: 3px solid var(--color-danger); }
+.callout-ok     { border-left: 3px solid var(--color-success); }
+
+/* Numbered walkthrough */
+.steps { list-style: none; padding: 0; margin: 1rem 0 1.5rem; counter-reset: step; }
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-muted);
+}
+.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.steps > li > h3 { margin-top: 0.15rem; }
+
+/* Code blocks. Long commands must scroll inside the block, never widen the
+   page, so a phone can still read the surrounding text. */
+.code-block { position: relative; margin: 0.75rem 0 1.25rem; }
+.code-block pre {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--color-text);
+  -webkit-overflow-scrolling: touch;
+}
+.code-block pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  white-space: pre;
+}
+.code-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  margin-bottom: 0.3rem;
+}
+.copy-code {
+  position: absolute;
+  top: 1.55rem;
+  right: 0.5rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+.code-block:hover .copy-code,
+.copy-code:focus-visible { opacity: 1; }
+.copy-code:hover { color: var(--color-text); border-color: var(--color-primary); }
+.copy-code.copied { color: var(--color-success); border-color: var(--color-success); opacity: 1; }
+/* Touch devices never hover, so keep the button permanently visible there. */
+@media (hover: none) {
+  .copy-code { opacity: 1; }
+}
+
+/* Reference tables */
+.table-scroll { overflow-x: auto; margin: 0.75rem 0 1.5rem; }
+.api-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 30rem;
+  font-size: 0.85rem;
+}
+.api-table th,
+.api-table td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+  color: var(--color-muted);
+}
+.api-table th {
+  color: var(--color-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.api-table td code { white-space: nowrap; }
+
+/* Endpoint list */
+.endpoint {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+.method {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: var(--color-border);
+  color: var(--color-text);
+  letter-spacing: 0.04em;
+}
+.method-post { background: var(--color-primary); color: #fff; }
+
 /* ── Footer ──────────────────────────────────────────────────── */
 .site-footer {
   border-top: 1px solid var(--color-border);
@@ -366,6 +546,7 @@ main {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 0.5rem 1.5rem;
 }
 

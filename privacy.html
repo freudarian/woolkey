@@ -24,12 +24,17 @@
   <p>WoolKey was designed around a single principle: <strong>your passwords are yours alone.</strong></p>
 
   <h2>What we collect</h2>
-  <p>Nothing. WoolKey has no backend, no database, no user accounts, and no analytics.</p>
+  <p>Nothing. WoolKey has no database, no user accounts, and no analytics.</p>
 
   <h2>Local generation only</h2>
-  <p>Every password and passphrase is generated entirely inside your browser using the
-  <a href="security.html">Web Crypto API</a>. The generated values never leave your device — not to
-  our servers, not to any third party, not anywhere.</p>
+  <p>Every password and passphrase you generate on this website is generated entirely inside your
+  browser using the <a href="security.html">Web Crypto API</a>. The generated values never leave
+  your device — not to our servers, not to any third party, not anywhere.</p>
+  <p>The separate, opt-in <a href="api.html">HTTP API</a> for scripts and AI agents is the one
+  exception, and only for those who deliberately use it: there, generation happens on the server
+  because that is what the caller asked for. Even then nothing is retained — the value is
+  returned and forgotten, with no database and no record of what was generated. Using this
+  website never touches that endpoint.</p>
 
   <h2>No storage</h2>
   <p>WoolKey does not store generated passwords in:</p>
@@ -65,6 +70,10 @@
   <span>© <span data-current-year></span> CoolerSheep</span>
   <a href="./">Home</a>
   <a href="security.html">Security</a>
+  <a href="api.html" class="link-ai">
+    <svg class="ai-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 1.5l1.7 4.9a4.5 4.5 0 0 0 2.9 2.9l4.9 1.7-4.9 1.7a4.5 4.5 0 0 0-2.9 2.9L11 20.5l-1.7-4.9a4.5 4.5 0 0 0-2.9-2.9L1.5 11l4.9-1.7a4.5 4.5 0 0 0 2.9-2.9z"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+    API
+  </a>
 </footer>
 <script src="js/site.js"></script>
 </body>

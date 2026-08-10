@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API — WoolKey</title>
+  <meta name="description" content="How to connect an AI agent or script to WoolKey and generate secure passwords and passphrases over HTTP.">
+  <meta name="theme-color" content="#0f1117">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="./" class="logo" aria-label="WoolKey home"><img src="assets/logo.gif" alt="" width="28" height="28"><span>WoolKey</span></a>
+  <div class="theme-switcher" role="group" aria-label="Theme">
+    <button type="button" class="theme-btn" data-theme-choice="light" aria-label="Light mode" title="Light mode">☀️</button>
+    <button type="button" class="theme-btn" data-theme-choice="dark" aria-label="Dark mode" title="Dark mode">🌙</button>
+    <button type="button" class="theme-btn" data-theme-choice="system" aria-label="System theme" title="System theme">💻</button>
+  </div>
+</header>
+
+<article class="prose" aria-label="API documentation">
+  <h1>
+    <svg class="ai-star" viewBox="0 0 24 24" aria-hidden="true" style="width:0.9em;height:0.9em;color:var(--color-primary)"><path d="M11 1.5l1.7 4.9a4.5 4.5 0 0 0 2.9 2.9l4.9 1.7-4.9 1.7a4.5 4.5 0 0 0-2.9 2.9L11 20.5l-1.7-4.9a4.5 4.5 0 0 0-2.9-2.9L1.5 11l4.9-1.7a4.5 4.5 0 0 0 2.9-2.9z"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+    API
+  </h1>
+  <p>WoolKey can generate passwords and passphrases for your scripts, tools, and AI agents —
+  the same generator the website uses, reachable over HTTP.</p>
+
+  <h2>Do I need an API key?</h2>
+
+  <div class="answer-box">
+    <p class="answer-lead">Yes. Every generation request needs a key.</p>
+    <p>Send it as an <code>X-Api-Key</code> header. Without it the API replies
+    <code>401 Unauthorized</code> and generates nothing.</p>
+    <p>The read-only endpoints below — the health check, the description, and the spec — work
+    without a key, so an agent can look up how the API works before it has one.</p>
+  </div>
+
+  <h3>How to get a key</h3>
+  <p><strong>Using the hosted WoolKey at coolersheep.com?</strong> Ask the site owner for a key.
+  Keys are handed out individually so usage can be traced and a single key can be revoked without
+  affecting anyone else.</p>
+
+  <p><strong>Running your own copy?</strong> You create the key yourself. On the server, in the
+  <code>api</code> folder:</p>
+
+  <div class="code-block">
+    <span class="code-label">Step 1 — create the config file</span>
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>cp config.example.php config.php
+chmod 600 config.php</code></pre>
+  </div>
+
+  <div class="code-block">
+    <span class="code-label">Step 2 — generate a random key</span>
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"</code></pre>
+  </div>
+
+  <div class="code-block">
+    <span class="code-label">Step 3 — paste it into config.php</span>
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>&lt;?php
+return [
+    'api_token' =&gt; 'paste-your-key-here',
+];</code></pre>
+  </div>
+
+  <p>That is all. <code>config.php</code> is blocked from the web and excluded from version
+  control, so the key cannot be downloaded or accidentally committed. Until you set one, the API
+  refuses to generate at all — it will not quietly run unprotected.</p>
+
+  <div class="callout callout-warn">
+    <p><strong>Treat the key like a password.</strong> Keep it in an environment variable or a
+    password manager, never in client-side JavaScript, a public repository, or a screenshot.
+    Anyone holding it can use your quota. To replace a key, edit <code>config.php</code> and
+    update your clients — there is nothing else to invalidate.</p>
+  </div>
+
+  <h2>Quick start</h2>
+  <p>Three steps from nothing to a generated password.</p>
+
+  <ol class="steps">
+    <li>
+      <h3>Check the API is up</h3>
+      <p>No key needed for this one.</p>
+      <div class="code-block">
+        <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>curl https://coolersheep.com/woolkey/api/health</code></pre>
+      </div>
+      <p>You should get back <code>{"status":"ok", ...}</code>.</p>
+    </li>
+    <li>
+      <h3>Put your key in a variable</h3>
+      <p>So it never ends up in your shell history or pasted into a chat.</p>
+      <div class="code-block">
+        <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>export WOOLKEY_KEY="your-key-here"</code></pre>
+      </div>
+    </li>
+    <li>
+      <h3>Generate a password</h3>
+      <div class="code-block">
+        <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>curl -X POST https://coolersheep.com/woolkey/api/generate \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: $WOOLKEY_KEY" \
+  -d '{"mode":"password","options":{"length":24,"includeSymbols":true}}'</code></pre>
+      </div>
+      <p>The password comes back in the <code>value</code> field.</p>
+    </li>
+  </ol>
+
+  <h2>Endpoints</h2>
+  <p>Base URL: <code>https://coolersheep.com/woolkey/api</code></p>
+
+  <div class="endpoint"><span class="method">GET</span> <code>/health</code> <span>Is the API up? No key needed.</span></div>
+  <div class="endpoint"><span class="method">GET</span> <code>/generate</code> <span>Describes every option and limit. No key needed.</span></div>
+  <div class="endpoint"><span class="method">GET</span> <code>/openapi.json</code> <span>Machine-readable spec. No key needed.</span></div>
+  <div class="endpoint"><span class="method method-post">POST</span> <code>/generate</code> <span><strong>Generates credentials. Key required.</strong></span></div>
+
+  <h2>Making a request</h2>
+  <p>Send <code>POST</code> to <code>/api/generate</code> with a JSON body. Only <code>mode</code>
+  is required — leave anything else out and a sensible default is used.</p>
+
+  <div class="table-scroll">
+    <table class="api-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>mode</code></td><td>string</td><td><em>required</em></td><td><code>"password"</code> or <code>"passphrase"</code></td></tr>
+        <tr><td><code>count</code></td><td>number</td><td><code>1</code></td><td>How many to generate at once, up to 20</td></tr>
+        <tr><td><code>options</code></td><td>object</td><td><code>{}</code></td><td>Settings for the chosen mode, below</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Options for <code>mode: "password"</code></h3>
+  <div class="table-scroll">
+    <table class="api-table">
+      <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>length</code></td><td><code>24</code></td><td>How many characters, from 8 to 128</td></tr>
+        <tr><td><code>includeLowercase</code></td><td><code>true</code></td><td>Use <code>a–z</code></td></tr>
+        <tr><td><code>includeUppercase</code></td><td><code>true</code></td><td>Use <code>A–Z</code></td></tr>
+        <tr><td><code>includeNumbers</code></td><td><code>true</code></td><td>Use <code>0–9</code></td></tr>
+        <tr><td><code>includeSymbols</code></td><td><code>false</code></td><td>Use <code>!@#$%^&amp;*()-_=+[]{};:,.?</code></td></tr>
+        <tr><td><code>avoidAmbiguous</code></td><td><code>false</code></td><td>Leave out <code>0O1Il5S8B</code>, which are easy to misread</td></tr>
+        <tr><td><code>excludedCharacters</code></td><td><code>""</code></td><td>Any other characters to avoid, e.g. <code>"&amp;$"</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Options for <code>mode: "passphrase"</code></h3>
+  <div class="table-scroll">
+    <table class="api-table">
+      <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>wordCount</code></td><td><code>4</code></td><td>How many words, from 4 to 8</td></tr>
+        <tr><td><code>separator</code></td><td><code>"hyphen"</code></td><td><code>"hyphen"</code>, <code>"underscore"</code>, <code>"dot"</code> or <code>"space"</code></td></tr>
+        <tr><td><code>capitalize</code></td><td><code>false</code></td><td>Capitalise each word</td></tr>
+        <tr><td><code>addNumber</code></td><td><code>false</code></td><td>Add a two-digit number on the end</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-ok">
+    <p>Ask for something out of range and you get a clear error rather than a silent
+    substitution. Requesting <code>length: 200</code> returns
+    <code>"options.length must be between 8 and 128"</code> — it will never hand back a
+    24-character password and let you believe it is 200.</p>
+  </div>
+
+  <h2>What you get back</h2>
+
+  <div class="code-block">
+    <span class="code-label">Response</span>
+<pre><code>{
+  "mode": "password",
+  "count": 1,
+  "value": "EXAMPLE-your-password-appears-here",
+  "entropy": { "bits": 149.95, "label": "Excellent", "level": 4 },
+  "metadata": { "entropyMode": "system", "poolSize": 76, "length": 24 },
+  "results": [ { "value": "...", "entropy": {...}, "metadata": {...} } ]
+}</code></pre>
+  </div>
+
+  <ul>
+    <li><code>value</code> — the generated password or passphrase. This is the part you want.</li>
+    <li><code>entropy.bits</code> — how hard it is to guess. Higher is better.</li>
+    <li><code>entropy.label</code> — the same number in words: Weak, Fair, Strong, Very strong, Excellent.</li>
+    <li><code>results</code> — one entry per credential. When you ask for several, they are all here.</li>
+  </ul>
+
+  <p>If you only ever ask for one credential, read <code>value</code> and ignore
+  <code>results</code> — the top-level fields always mirror the first result.</p>
+
+  <h2>Generating several at once</h2>
+  <p>Set <code>count</code> to get a batch in a single request, which also uses only one of your
+  rate-limit slots instead of twenty.</p>
+
+  <div class="code-block">
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>curl -X POST https://coolersheep.com/woolkey/api/generate \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: $WOOLKEY_KEY" \
+  -d '{"mode":"password","count":5,"options":{"length":32}}'</code></pre>
+  </div>
+
+  <h2>More examples</h2>
+
+  <h3>Passphrase</h3>
+  <div class="code-block">
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>curl -X POST https://coolersheep.com/woolkey/api/generate \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: $WOOLKEY_KEY" \
+  -d '{"mode":"passphrase","options":{"wordCount":6,"capitalize":true}}'</code></pre>
+  </div>
+  <p>Gives you something like <code>Eagle-Newer-Shock-Folio-Depot-Taste</code>.</p>
+
+  <h3>JavaScript</h3>
+  <div class="code-block">
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>const res = await fetch('https://coolersheep.com/woolkey/api/generate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Api-Key': process.env.WOOLKEY_KEY,
+  },
+  body: JSON.stringify({
+    mode: 'password',
+    options: { length: 24, includeSymbols: true },
+  }),
+});
+
+if (!res.ok) throw new Error((await res.json()).error);
+const { value } = await res.json();</code></pre>
+  </div>
+
+  <h3>Python</h3>
+  <div class="code-block">
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>import os, requests
+
+res = requests.post(
+    "https://coolersheep.com/woolkey/api/generate",
+    headers={"X-Api-Key": os.environ["WOOLKEY_KEY"]},
+    json={"mode": "password", "options": {"length": 24, "includeSymbols": True}},
+    timeout=10,
+)
+res.raise_for_status()
+password = res.json()["value"]</code></pre>
+  </div>
+
+  <h3>Postman</h3>
+  <ul>
+    <li>Method <code>POST</code>, URL <code>https://coolersheep.com/woolkey/api/generate</code></li>
+    <li>Headers: <code>Content-Type: application/json</code> and <code>X-Api-Key: your-key</code></li>
+    <li>Body → raw → JSON, then paste any of the bodies above</li>
+  </ul>
+  <p>Or use <strong>Import → Link</strong> with
+  <code>https://coolersheep.com/woolkey/api/openapi.json</code> to get every request pre-built.</p>
+
+  <h2>Connecting an AI agent</h2>
+  <p>The API is designed so an agent can work it out on its own. Point it at the description
+  endpoint and it learns every mode, option, default, and limit without you writing a schema:</p>
+
+  <div class="code-block">
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>curl https://coolersheep.com/woolkey/api/generate</code></pre>
+  </div>
+
+  <p>For a tool definition, hand the agent the <code>POST /generate</code> schema from
+  <code>openapi.json</code>. Then:</p>
+  <ul>
+    <li>Keep the key in an environment variable, not in the tool definition itself.</li>
+    <li>Tell the agent to treat <code>value</code> as a secret — not to print it, log it, or write
+    it into a transcript.</li>
+    <li>Read the <code>error</code> and <code>field</code> fields on a failure; they say exactly
+    what to fix.</li>
+  </ul>
+
+  <h2>When something goes wrong</h2>
+  <p>Errors always come back as JSON, and name the field at fault where there is one:</p>
+
+  <div class="code-block">
+<pre><code>{ "error": "options.length must be between 8 and 128",
+  "status": 400,
+  "field": "options.length" }</code></pre>
+  </div>
+
+  <div class="table-scroll">
+    <table class="api-table">
+      <thead><tr><th>Code</th><th>Meaning</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td><code>400</code></td><td>Something in your request is wrong</td><td>Read <code>error</code> and <code>field</code></td></tr>
+        <tr><td><code>401</code></td><td>Key missing or wrong</td><td>Check the <code>X-Api-Key</code> header</td></tr>
+        <tr><td><code>413</code></td><td>Request body over 16 KB</td><td>Send a smaller body</td></tr>
+        <tr><td><code>429</code></td><td>Too many requests</td><td>Wait the number of seconds in <code>Retry-After</code></td></tr>
+        <tr><td><code>503</code></td><td>No key configured on the server</td><td>Only on self-hosted copies — set <code>api_token</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Rate limits</h2>
+  <p><strong>20 requests per minute</strong> from one IP address. Every reply tells you where you
+  stand:</p>
+  <ul>
+    <li><code>X-RateLimit-Remaining</code> — requests left in this minute</li>
+    <li><code>X-RateLimit-Reset</code> — seconds until the count resets</li>
+    <li><code>Retry-After</code> — on a <code>429</code>, how long to wait</li>
+  </ul>
+  <p>Need a lot of credentials? Use <code>count</code> — one request for twenty passwords instead
+  of twenty requests.</p>
+
+  <h2>What happens to what you generate</h2>
+  <div class="callout callout-ok">
+    <p>Nothing is stored. WoolKey generates the value, sends it to you, and keeps no copy — not in
+    a database, not in a log file. There is no history to look up and nothing for us to lose.
+    Saving it is your side of the job; send it straight to your password manager.</p>
+  </div>
+  <p>Requests are served over HTTPS and responses are marked <code>no-store</code>, so browsers
+  and proxies are told not to keep a copy either. See <a href="security.html">Security</a> for the
+  full picture.</p>
+
+  <h2>In-browser alternative</h2>
+  <p>If your agent drives a real browser rather than speaking HTTP, this page's generator is
+  available directly on the WoolKey home page as <code>window.WoolKeyAPI</code> —
+  <strong>no key, no network request, nothing leaves the browser</strong>.</p>
+
+  <div class="code-block">
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>// Run this on the WoolKey home page
+const result = window.WoolKeyAPI.generate({
+  mode: 'password',
+  count: 3,
+  options: { length: 24, includeSymbols: true },
+});
+
+if (!result.ok) throw new Error(result.error);
+result.data.results.map(r =&gt; r.value);</code></pre>
+  </div>
+
+  <p>It takes the same options as the HTTP endpoint and returns the same numbers, so you can swap
+  between the two. <code>window.WoolKeyAPI.describe()</code> lists everything available, and
+  <code>generate()</code> returns <code>{ ok: false, error }</code> instead of throwing, which is
+  easier to handle from an automation script.</p>
+
+  <h2>Reference</h2>
+  <p>Full machine-readable specification:
+  <a href="api/openapi.json">openapi.json</a>. Live description of this
+  server's current limits: <a href="api/generate">api/generate</a>.</p>
+</article>
+
+<footer class="site-footer">
+  <span>© <span data-current-year></span> CoolerSheep</span>
+  <a href="./">Home</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="security.html">Security</a>
+</footer>
+<script src="js/site.js"></script>
+<script src="js/clipboard.js"></script>
+<script src="js/api-doc.js"></script>
+</body>
+</html>

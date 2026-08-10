@@ -15,8 +15,9 @@
     RewriteCond %{HTTPS} !=on
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # API endpoint
+    # API endpoints
     RewriteRule ^api/generate/?$ api/generate.php [L,QSA]
+    RewriteRule ^api/health/?$   api/generate.php?health=1 [L]
 </IfModule>
 
 
@@ -104,6 +105,25 @@ ErrorDocument 404 /404.html
     ExpiresByType application/manifest+json "access plus 1 day"
 
 </IfModule>
+
+
+# ------------------------------------------------------------
+# Service worker must never be served stale
+# ------------------------------------------------------------
+
+# ExpiresByType would give this a 7-day max-age like any other .js file, but
+# the service worker is the mechanism that ships every other update — a stale
+# copy pins visitors to an old build.
+
+<Files "service-worker.js">
+    <IfModule mod_expires.c>
+        ExpiresActive Off
+    </IfModule>
+    <IfModule mod_headers.c>
+        Header always set Cache-Control "no-cache, must-revalidate"
+        Header always unset Expires
+    </IfModule>
+</Files>
 
 
 # ------------------------------------------------------------
