@@ -42,6 +42,13 @@ function generate() {
 /* ── Event wiring ────────────────────────────────────────────── */
 
 function init() {
+  if (typeof initUserEntropyCollector === 'function') {
+    initUserEntropyCollector();
+  }
+  if (typeof setUserEntropyMixingEnabled === 'function') {
+    setUserEntropyMixingEnabled(true);
+  }
+
   // Mode toggle
   UI.modePassword?.addEventListener('click', () => {
     _mode = 'password';
