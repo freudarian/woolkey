@@ -166,12 +166,48 @@ curl https://coolersheep.com/woolkey/api/generate
 
 ### Postman
 
-1. Method `POST`, URL `https://coolersheep.com/woolkey/api/generate`.
-2. Headers: `Content-Type: application/json` and `X-Api-Key: <your-token>`.
-3. Body → raw → JSON, paste one of the bodies above.
+A ready-made collection lives at
+`api/woolkey.postman_collection.json`, served publicly. In Postman:
+**Import → Link**, paste the URL, **Continue**:
 
-Or import `https://coolersheep.com/woolkey/api/openapi.json` (**Import → Link**) to
-get every request pre-built.
+```
+https://coolersheep.com/woolkey/api/woolkey.postman_collection.json
+```
+
+Then set `apiKey` under the collection's **Variables** tab, in the **Current value**
+column — that column is local-only and is not included when the collection is
+exported, forked, or shared.
+
+The collection carries six requests (health, describe, password, passphrase, batch,
+and a deliberately-rejected request), collection-level `X-Api-Key` auth with the two
+read-only requests overriding to no auth, saved example responses, and tests
+asserting length, ambiguity exclusion, batch uniqueness, and that entropy matches the
+word count.
+
+It deliberately does **not** store generated values in Postman variables, since those
+are persisted to disk.
+
+An optional environment is at `api/woolkey.postman_environment.json`, with `apiKey`
+typed as `secret` so Postman masks it.
+
+#### Getting a true one-click "Run in Postman" button
+
+The button Postman renders as a one-click link requires the collection to live in a
+**public Postman workspace** — it is served from Postman's cloud, not from this
+server, so it cannot be produced from the repo alone. It needs a free Postman
+account. Once you have one:
+
+1. Import the collection above into Postman.
+2. Move it into a public workspace (**Workspace settings → Visibility → Public**).
+3. On the collection, **Share → Via Run in Postman → Get the code**, then copy the
+   HTML or Markdown snippet.
+4. Paste the HTML snippet into `api.html`, replacing the "Fastest: import by link"
+   block. The snippet loads `https://run.pstmn.io/button.svg` from Postman's CDN, so
+   `img-src` and `script-src` in `.htaccess` need to allow that host — otherwise the
+   site CSP will block the button.
+
+Until then, **Import → Link** is the closest thing, and needs no account on either
+side.
 
 ### Wiring it into an agent
 

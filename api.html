@@ -253,14 +253,63 @@ res.raise_for_status()
 password = res.json()["value"]</code></pre>
   </div>
 
-  <h3>Postman</h3>
+  <h2>Postman</h2>
+  <p>Don't build the requests by hand — import the ready-made collection. It arrives with every
+  request filled in, documented, and with tests that check the responses.</p>
+
+  <h3>Fastest: import by link</h3>
+  <p>In Postman: <strong>Import</strong> → <strong>Link</strong> → paste this → <strong>Continue</strong>.</p>
+
+  <div class="code-block">
+    <span class="code-label">Collection URL</span>
+    <button type="button" class="copy-code" data-copy>Copy</button>
+<pre><code>https://coolersheep.com/woolkey/api/woolkey.postman_collection.json</code></pre>
+  </div>
+
+  <p>Then set your key: open the collection → <strong>Variables</strong> → paste it into
+  <code>apiKey</code> under <strong>Current value</strong>. That column stays on your machine, so
+  the key is not included if you later export or share the collection.</p>
+
+  <p>That's it. Hit <strong>Send</strong> on <em>1. Health check</em> to confirm it works, then
+  <em>3. Generate a password</em>.</p>
+
+  <h3>Or download the files</h3>
   <ul>
-    <li>Method <code>POST</code>, URL <code>https://coolersheep.com/woolkey/api/generate</code></li>
-    <li>Headers: <code>Content-Type: application/json</code> and <code>X-Api-Key: your-key</code></li>
-    <li>Body → raw → JSON, then paste any of the bodies above</li>
+    <li><a href="api/woolkey.postman_collection.json" download>woolkey.postman_collection.json</a>
+    — the six requests. Drag it onto the Postman window to import.</li>
+    <li><a href="api/woolkey.postman_environment.json" download>woolkey.postman_environment.json</a>
+    — optional environment holding <code>baseUrl</code> and <code>apiKey</code>, with the key
+    marked as a secret so Postman masks it on screen.</li>
   </ul>
-  <p>Or use <strong>Import → Link</strong> with
-  <code>https://coolersheep.com/woolkey/api/openapi.json</code> to get every request pre-built.</p>
+
+  <h3>What's in the collection</h3>
+  <div class="table-scroll">
+    <table class="api-table">
+      <thead><tr><th>Request</th><th>Needs a key</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td>1. Health check</td><td>No</td><td>Confirms the API is reachable before you worry about your key</td></tr>
+        <tr><td>2. Describe the API</td><td>No</td><td>Every option and limit this server supports</td></tr>
+        <tr><td>3. Generate a password</td><td>Yes</td><td>The main request, with all options laid out</td></tr>
+        <tr><td>4. Generate a passphrase</td><td>Yes</td><td>Word-based credentials</td></tr>
+        <tr><td>5. Generate a batch</td><td>Yes</td><td>Up to 20 at once from a single request</td></tr>
+        <tr><td>6. Rejected request</td><td>Yes</td><td><em>Meant to fail</em> — shows input being rejected, not silently altered</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-ok">
+    <p>The collection never saves a generated password into a Postman variable. Those are written
+    to disk, and a password generator that leaves copies lying around would rather defeat the
+    point. Copy what you need from the response straight into your password manager.</p>
+  </div>
+
+  <h3>By hand</h3>
+  <p>If you would rather set it up yourself: method <code>POST</code>, URL
+  <code>https://coolersheep.com/woolkey/api/generate</code>, headers
+  <code>Content-Type: application/json</code> and <code>X-Api-Key: your-key</code>, then
+  body → raw → JSON with any of the bodies above. Importing
+  <code>openapi.json</code> the same way works too, though it produces bare requests with no
+  tests or examples.</p>
 
   <h2>Connecting an AI agent</h2>
   <p>The API is designed so an agent can work it out on its own. Point it at the description
@@ -348,9 +397,12 @@ result.data.results.map(r =&gt; r.value);</code></pre>
   easier to handle from an automation script.</p>
 
   <h2>Reference</h2>
-  <p>Full machine-readable specification:
-  <a href="api/openapi.json">openapi.json</a>. Live description of this
-  server's current limits: <a href="api/generate">api/generate</a>.</p>
+  <ul>
+    <li><a href="api/openapi.json">openapi.json</a> — full machine-readable specification</li>
+    <li><a href="api/generate">api/generate</a> — live description of this server's current limits</li>
+    <li><a href="api/woolkey.postman_collection.json" download>Postman collection</a> — six ready-made requests</li>
+    <li><a href="api/woolkey.postman_environment.json" download>Postman environment</a> — optional key holder</li>
+  </ul>
 </article>
 
 <footer class="site-footer">

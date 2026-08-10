@@ -1,0 +1,389 @@
+{
+  "info": {
+    "_postman_id": "9f2c1d54-6b83-4d0e-9a17-c4e5b8a71d20",
+    "name": "WoolKey Credential Generator",
+    "description": "Generate cryptographically secure passwords and passphrases over HTTP.\n\n## Before you start\n\nSet the `apiKey` variable. Open the collection, go to **Variables**, and paste your key into the **Current value** column — that column stays on your machine and is not shared if you export or fork this collection.\n\nNo key? See https://coolersheep.com/woolkey/api.html\n\n`baseUrl` already points at the hosted instance. Change it if you run your own copy.\n\n## Authentication\n\nSet once at the collection level as `X-Api-Key`, so every request inherits it. The two read-only requests override this to no auth, because they do not need a key.\n\n## A note on the generated values\n\nThese requests deliberately do not save the generated password into a Postman variable. Collection and environment values are written to disk, and a password generator that quietly leaves copies lying around would be missing the point. Copy what you need from the response body straight into your password manager.\n\n## Rate limit\n\n20 requests per minute per IP. Every response carries `X-RateLimit-Remaining` and `X-RateLimit-Reset`. Use the batch request instead of a Collection Runner loop.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "X-Api-Key", "type": "string" },
+      { "key": "value", "value": "{{apiKey}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://coolersheep.com/woolkey/api",
+      "type": "string",
+      "description": "Base URL of the WoolKey API. Change this if you self-host."
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string",
+      "description": "Your API key. Paste it into the Current value column so it is not exported."
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Runs after every request in this collection.",
+          "// Turns the two most common setup mistakes into a readable message",
+          "// instead of a bare 401 or 503.",
+          "if (pm.response.code === 401) {",
+          "    console.warn('401 Unauthorized — the apiKey variable is empty or wrong. Set it under the collection\\'s Variables tab, Current value column.');",
+          "}",
+          "if (pm.response.code === 503) {",
+          "    console.warn('503 — the server has no api_token configured. This one is fixed on the server, not here.');",
+          "}",
+          "if (pm.response.code === 429) {",
+          "    console.warn('429 Rate limited. Retry after ' + pm.response.headers.get('Retry-After') + ' seconds.');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health check",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Is the API up? Needs no API key, so it is the right first request to confirm `baseUrl` is correct before worrying about your key."
+      },
+      "response": [
+        {
+          "name": "Service is up",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+          "cookie": [],
+          "body": "{\n    \"status\": \"ok\",\n    \"version\": \"1.1.0\",\n    \"time\": \"2026-08-10T19:36:42+00:00\"\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Reports ok', () => {",
+              "    pm.expect(pm.response.json().status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Describe the API",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["generate"]
+        },
+        "description": "Returns every mode, option, default and limit this server supports. Needs no API key.\n\nThis is what an AI agent should call first — it can work out how to use the API from this response alone, without being handed a schema."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "",
+              "pm.test('Describes both modes', () => {",
+              "    const d = pm.response.json();",
+              "    pm.expect(d.modes).to.have.property('password');",
+              "    pm.expect(d.modes).to.have.property('passphrase');",
+              "});",
+              "",
+              "pm.test('States that nothing is stored', () => {",
+              "    pm.expect(pm.response.json().storage).to.eql('none');",
+              "});",
+              "",
+              "// Surface the live limits so you do not have to read the whole body.",
+              "const d = pm.response.json();",
+              "console.log('Max batch size: ' + d.limits.maxCount +",
+              "            ' | Rate limit: ' + d.limits.rateLimit.requests +",
+              "            ' per ' + d.limits.rateLimit.windowSeconds + 's' +",
+              "            ' | Auth required: ' + d.auth.required);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Generate a password",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mode\": \"password\",\n    \"options\": {\n        \"length\": 24,\n        \"includeLowercase\": true,\n        \"includeUppercase\": true,\n        \"includeNumbers\": true,\n        \"includeSymbols\": true,\n        \"avoidAmbiguous\": true,\n        \"excludedCharacters\": \"\"\n    }\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["generate"]
+        },
+        "description": "The main request. Requires your API key.\n\nThe password is in the `value` field.\n\n**Options** — every one is optional:\n\n| Option | Default | Range |\n| --- | --- | --- |\n| `length` | 24 | 8–128 |\n| `includeLowercase` | true | |\n| `includeUppercase` | true | |\n| `includeNumbers` | true | |\n| `includeSymbols` | false | |\n| `avoidAmbiguous` | false | excludes `0O1Il5S8B` |\n| `excludedCharacters` | `\"\"` | max 128 chars |\n\nOut-of-range values are rejected with a 400 naming the field — you will never be handed something weaker than you asked for."
+      },
+      "response": [
+        {
+          "name": "Generated",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mode\": \"password\",\n    \"options\": { \"length\": 24, \"includeSymbols\": true, \"avoidAmbiguous\": true }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/generate", "host": ["{{baseUrl}}"], "path": ["generate"] }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+          "cookie": [],
+          "body": "{\n    \"mode\": \"password\",\n    \"count\": 1,\n    \"value\": \"EXAMPLE-your-password-appears-here\",\n    \"entropy\": {\n        \"bits\": 149.95,\n        \"label\": \"Excellent\",\n        \"level\": 4\n    },\n    \"metadata\": {\n        \"entropyMode\": \"system\",\n        \"poolSize\": 76,\n        \"length\": 24\n    },\n    \"results\": [\n        {\n            \"value\": \"EXAMPLE-your-password-appears-here\",\n            \"entropy\": { \"bits\": 149.95, \"label\": \"Excellent\", \"level\": 4 },\n            \"metadata\": { \"entropyMode\": \"system\", \"poolSize\": 76, \"length\": 24 }\n        }\n    ]\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "",
+              "pm.test('Returns a password', () => {",
+              "    const d = pm.response.json();",
+              "    pm.expect(d.mode).to.eql('password');",
+              "    pm.expect(d.value).to.be.a('string').and.to.have.length.above(0);",
+              "});",
+              "",
+              "pm.test('Honours the requested length', () => {",
+              "    const asked = JSON.parse(pm.request.body.raw).options.length;",
+              "    pm.expect(pm.response.json().value.length).to.eql(asked);",
+              "});",
+              "",
+              "pm.test('avoidAmbiguous is respected', () => {",
+              "    const value = pm.response.json().value;",
+              "    pm.expect(/[0O1Il5S8B]/.test(value)).to.be.false;",
+              "});",
+              "",
+              "pm.test('Entropy is reported and strong', () => {",
+              "    pm.expect(pm.response.json().entropy.bits).to.be.above(100);",
+              "});",
+              "",
+              "// Reports strength only. The password itself is never logged or stored",
+              "// in a variable — Postman writes those to disk.",
+              "const e = pm.response.json().entropy;",
+              "console.log('Generated ' + Math.round(e.bits) + ' bits (' + e.label + '). Copy it from the response body.');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Generate a passphrase",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mode\": \"passphrase\",\n    \"options\": {\n        \"wordCount\": 6,\n        \"separator\": \"hyphen\",\n        \"capitalize\": true,\n        \"addNumber\": false\n    }\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["generate"]
+        },
+        "description": "Words are drawn from a 1,144-word list, so each word is worth about 10.2 bits.\n\n| Option | Default | Range |\n| --- | --- | --- |\n| `wordCount` | 4 | 4–8 |\n| `separator` | `\"hyphen\"` | `hyphen`, `underscore`, `dot`, `space` |\n| `capitalize` | false | |\n| `addNumber` | false | two-digit suffix |\n\nThe default of 4 words is only about 41 bits. Use 6 or more for anything that matters. `addNumber` is not counted toward the reported entropy, because two digits add far less than a word does."
+      },
+      "response": [
+        {
+          "name": "Generated",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mode\": \"passphrase\",\n    \"options\": { \"wordCount\": 6, \"capitalize\": true }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/generate", "host": ["{{baseUrl}}"], "path": ["generate"] }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+          "cookie": [],
+          "body": "{\n    \"mode\": \"passphrase\",\n    \"count\": 1,\n    \"value\": \"Lapse-Hurtle-Added-Fickle-Tuner-Berth\",\n    \"entropy\": {\n        \"bits\": 60.96,\n        \"label\": \"Strong\",\n        \"level\": 2\n    },\n    \"metadata\": {\n        \"entropyMode\": \"system\",\n        \"wordCount\": 6,\n        \"wordListSize\": 1144\n    },\n    \"results\": [\n        {\n            \"value\": \"Lapse-Hurtle-Added-Fickle-Tuner-Berth\",\n            \"entropy\": { \"bits\": 60.96, \"label\": \"Strong\", \"level\": 2 },\n            \"metadata\": { \"entropyMode\": \"system\", \"wordCount\": 6, \"wordListSize\": 1144 }\n        }\n    ]\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "",
+              "pm.test('Returns the requested number of words', () => {",
+              "    const asked = JSON.parse(pm.request.body.raw).options.wordCount;",
+              "    const d = pm.response.json();",
+              "    pm.expect(d.metadata.wordCount).to.eql(asked);",
+              "    pm.expect(d.value.split('-').length).to.eql(asked);",
+              "});",
+              "",
+              "pm.test('Entropy matches the word count', () => {",
+              "    const d = pm.response.json();",
+              "    const expected = d.metadata.wordCount * Math.log2(d.metadata.wordListSize);",
+              "    pm.expect(d.entropy.bits).to.be.closeTo(expected, 0.05);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Generate a batch",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mode\": \"password\",\n    \"count\": 5,\n    \"options\": {\n        \"length\": 32,\n        \"includeSymbols\": true\n    }\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["generate"]
+        },
+        "description": "`count` returns up to 20 credentials in one call, all in `results[]`.\n\nPrefer this over looping in the Collection Runner: twenty passwords cost one rate-limit slot this way instead of twenty."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "",
+              "pm.test('Returns the requested count', () => {",
+              "    const asked = JSON.parse(pm.request.body.raw).count;",
+              "    const d = pm.response.json();",
+              "    pm.expect(d.count).to.eql(asked);",
+              "    pm.expect(d.results).to.have.lengthOf(asked);",
+              "});",
+              "",
+              "pm.test('Every credential is unique', () => {",
+              "    const values = pm.response.json().results.map(r => r.value);",
+              "    pm.expect(new Set(values).size).to.eql(values.length);",
+              "});",
+              "",
+              "pm.test('Rate limit headers are present', () => {",
+              "    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.not.be.null;",
+              "});",
+              "",
+              "console.log('Requests left this minute: ' + pm.response.headers.get('X-RateLimit-Remaining'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Rejected request (expected 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mode\": \"password\",\n    \"options\": {\n        \"length\": 200\n    }\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/generate",
+          "host": ["{{baseUrl}}"],
+          "path": ["generate"]
+        },
+        "description": "**This request is meant to fail.** It asks for a 200-character password, which is over the 128 limit.\n\nIt is here to show that the API rejects bad input rather than quietly substituting a default. A generator that silently gave you 24 characters when you asked for 200 would be worse than useless — you would trust a password far weaker than you believed.\n\nThe response names the field at fault in `field`, so a script or an agent can correct itself without guessing."
+      },
+      "response": [
+        {
+          "name": "Rejected",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mode\": \"password\",\n    \"options\": { \"length\": 200 }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/generate", "host": ["{{baseUrl}}"], "path": ["generate"] }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+          "cookie": [],
+          "body": "{\n    \"error\": \"options.length must be between 8 and 128\",\n    \"status\": 400,\n    \"field\": \"options.length\"\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Rejected with 400, not silently clamped', () => {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Names the field at fault', () => {",
+              "    const d = pm.response.json();",
+              "    pm.expect(d.field).to.eql('options.length');",
+              "    pm.expect(d.error).to.be.a('string');",
+              "});",
+              "",
+              "pm.test('No credential is returned', () => {",
+              "    pm.expect(pm.response.json()).to.not.have.property('value');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
