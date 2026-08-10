@@ -161,6 +161,22 @@ main {
   user-select: text;
   color: var(--color-text);
 }
+.visibility-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.visibility-btn:hover { color: var(--color-text); background: var(--color-border); }
+.visibility-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
 /* ── Action buttons ──────────────────────────────────────────── */
 .actions {

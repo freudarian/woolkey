@@ -47,7 +47,7 @@ const UI = {
 
 /* ── Render helpers ──────────────────────────────────────────── */
 
-let _hidden = false;
+let _hidden = true;
 
 function setOutputValue(text) {
   const el = UI.output;
@@ -64,9 +64,12 @@ function getOutputValue() {
 function updateToggleLabel() {
   const btn = UI.toggleBtn;
   if (!btn) return;
-  btn.textContent = _hidden ? 'Show' : 'Hide';
+  const eyeOff = document.getElementById('icon-eye-off');
+  const eye    = document.getElementById('icon-eye');
+  if (eyeOff) eyeOff.hidden = !_hidden;
+  if (eye)    eye.hidden    = _hidden;
   btn.setAttribute('aria-label', _hidden ? 'Show password' : 'Hide password');
-  btn.setAttribute('aria-pressed', String(!_hidden));
+  btn.setAttribute('aria-pressed', String(_hidden));
 }
 
 function toggleVisibility() {
@@ -123,7 +126,7 @@ function setMode(mode) {
 
 function getPasswordOptions() {
   return {
-    length:              parseInt(UI.lengthSlider?.value ?? 16, 10),
+    length:              parseInt(UI.lengthSlider?.value ?? 24, 10),
     includeLowercase:    UI.chkLower?.checked ?? true,
     includeUppercase:    UI.chkUpper?.checked ?? true,
     includeNumbers:      UI.chkNumbers?.checked ?? true,
