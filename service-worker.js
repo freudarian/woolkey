@@ -24,8 +24,8 @@ const STATIC_ASSETS = [
   '/js/app.js',
   '/data/words.js',
   '/manifest.webmanifest',
-  '/assets/favicon.svg',
-  '/assets/logo.svg',
+  '/assets/favicon.png',
+  '/assets/logo.gif',
 ];
 
 self.addEventListener('install', (event) => {
