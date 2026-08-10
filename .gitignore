@@ -5,6 +5,9 @@
 # Dependencies
 node_modules/
 
+# API secrets — holds the live api_token, never commit
+api/config.php
+
 # Environment variables
 .env
 .env.local
