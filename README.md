@@ -127,7 +127,7 @@ single-result callers can ignore `results` entirely.
 |---|---|
 | `400` | Invalid input — see `error` and `field` |
 | `401` | Missing or incorrect API key |
-| `405` | Wrong method — see the `Allow` header |
+| `405` | Wrong method — see the `Allow` header. Some hosts, including this one, reject `PUT`/`PATCH`/`DELETE` with `403` at the web-server level before PHP is reached. |
 | `413` | Body larger than 16 KB |
 | `429` | Rate limited — see `Retry-After` |
 | `503` | `api/config.php` missing or has no token |
