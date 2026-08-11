@@ -72,8 +72,32 @@ ErrorDocument 404 /404.html
     # connect-src 'none' prevents JavaScript from making network/API requests.
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
 
-    # Enable this ONLY after HTTPS is confirmed working correctly.
-    # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    # HSTS.
+    #
+    # The HTTPS redirect at the top of this file travels over plaintext HTTP,
+    # so it only works if it arrives. Someone who types the bare domain on a
+    # hostile network sends one unencrypted request first, and an attacker in
+    # that position simply never delivers the redirect — they serve a look-alike
+    # over HTTP instead. This header is what removes that first request: once a
+    # browser has seen it, it rewrites http:// to https:// before anything
+    # leaves the machine.
+    #
+    # Deliberately short to begin with. max-age is a promise the browser holds
+    # us to: for its whole duration it refuses to reach the site over HTTP and
+    # will not let a visitor click through a certificate error, so a lapsed cert
+    # becomes an outage rather than a warning. Five minutes is long enough to
+    # confirm nothing breaks and short enough to cost nothing if it does.
+    #
+    # The ladder from here, one rung per deploy, confirming each:
+    #     max-age=86400
+    #     max-age=63072000
+    #     max-age=63072000; includeSubDomains
+    #
+    # includeSubDomains is safe when it comes: api.woolkey.com already serves
+    # HTTPS with a valid certificate. "preload" is deliberately absent from that
+    # ladder — it hardcodes the domain into browser binaries and removal takes
+    # months, so it is a one-way door and adds little over a two-year max-age.
+    Header always set Strict-Transport-Security "max-age=300"
 
 </IfModule>
 
