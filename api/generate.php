@@ -184,6 +184,35 @@ function rate_limit_gc(int $window): void {
     }
 }
 
+/**
+ * The bucket a caller counts against.
+ *
+ * IPv6 is why this is not simply the address. A single customer is routinely
+ * handed a whole /64 — 18 quintillion addresses, all routable, no proxy
+ * needed — so bucketing on the full address lets one caller mint a fresh
+ * quota for every request at zero cost. Folding IPv6 down to its /64 prefix
+ * makes the entire allocation share one bucket. IPv4 keeps its full address:
+ * rotating there means actually controlling more hosts.
+ *
+ * REMOTE_ADDR only. X-Forwarded-For is caller-supplied and would reduce this
+ * to a no-op for anyone willing to set a header. If a CDN or reverse proxy is
+ * ever put in front of this API, REMOTE_ADDR becomes the edge's address and
+ * every visitor collapses into one bucket — that is the moment to revisit
+ * this function, not before.
+ */
+function rate_limit_key(): string {
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+
+    if (str_contains($ip, ':')) {
+        $packed = @inet_pton($ip);
+        if ($packed !== false && strlen($packed) === 16) {
+            $ip = bin2hex(substr($packed, 0, 8)) . '/64';
+        }
+    }
+
+    return hash('sha256', $ip);
+}
+
 function rate_limit_check(): void {
     $limits  = cfg('rate_limit', ['requests' => 20, 'window' => 60]);
     $maxReqs = max(1, (int) ($limits['requests'] ?? 20));
@@ -193,7 +222,7 @@ function rate_limit_check(): void {
     if (!is_dir($dir)) @mkdir($dir, 0700, true);
     rate_limit_gc($window);
 
-    $file = $dir . '/' . hash('sha256', $_SERVER['REMOTE_ADDR'] ?? '');
+    $file = $dir . '/' . rate_limit_key();
     $now  = time();
     $hits = [];
 
