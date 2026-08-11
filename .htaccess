@@ -150,6 +150,22 @@ ErrorDocument 404 /404.html
     <IfModule mod_headers.c>
         Header always set Cache-Control "no-cache, must-revalidate"
         Header always unset Expires
+
+        # A service worker runs under the CSP delivered with its own script,
+        # not the one on the page that registered it. The site-wide policy
+        # sets connect-src 'none' — correct for page JavaScript, fatal here:
+        # every fetch the worker makes is checked against it, including the
+        # ones cache.addAll() issues during install. Install therefore
+        # rejected, the worker went redundant, and the empty cache created
+        # moments earlier by caches.open() was orphaned — one per deploy,
+        # with activate never running to clear it. Offline support never
+        # worked in production at all.
+        #
+        # 'self' is the whole allowance. The worker can fetch this origin's
+        # own assets and nothing else, so nothing can be sent anywhere. The
+        # page keeps connect-src 'none', which is what actually guarantees a
+        # generated credential cannot leave the browser.
+        Header always set Content-Security-Policy "default-src 'self'; connect-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     </IfModule>
 </Files>
 

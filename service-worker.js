@@ -10,7 +10,7 @@
 // so a returning visitor keeps serving the old bundle until this string
 // changes: that is what triggers the browser to install a new worker, populate
 // a fresh cache, and drop the previous one in activate.
-const CACHE_NAME = 'woolkey-v14';
+const CACHE_NAME = 'woolkey-v15';
 const BASE_PATH = self.location.pathname.replace(/[^/]+$/, '');
 function assetPath(path) {
   return BASE_PATH + path;
@@ -57,10 +57,22 @@ const STATIC_ASSETS = [
   assetPath('assets/herd-of-sheep-night.webp'),
 ];
 
+// Precache each asset on its own. cache.addAll() is atomic: one entry that
+// 404s rejects the whole thing, the install fails, the worker goes redundant
+// and the cache opened a moment earlier is left behind empty — with activate
+// never running to tidy it up. That is exactly how this site lost offline
+// support for every visitor, so a single missing file is now logged and
+// skipped rather than allowed to take the rest down with it.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then((cache) => Promise.all(
+        STATIC_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('[woolkey] precache skipped:', url, err);
+          })
+        )
+      ))
       .then(() => self.skipWaiting())
   );
 });
