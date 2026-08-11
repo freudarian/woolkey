@@ -1,0 +1,6 @@
+{
+  "error": "Not found. No such endpoint on this API.",
+  "status": 404,
+  "endpoints": ["GET /health", "GET /generate", "GET /openapi.json", "POST /generate"],
+  "docs": "https://woolkey.com/api.html"
+}

@@ -1,6 +1,79 @@
 # ============================================================
 # WoolKey API directory
+#
+# This folder is served under two hostnames:
+#   api.woolkey.com   — the folder IS the document root, so Apache never
+#                       reads the site's root .htaccess for these requests
+#   woolkey.com/api/  — the root .htaccess applies as usual
+#
+# Anything the API relies on from the root file therefore has to be repeated
+# here, or it silently stops applying on the subdomain.
+#
+# NOTE: the PHP handler is one of those things. The root .htaccess carries a
+# cPanel-generated AddHandler block; it is deliberately NOT copied here,
+# because pinning a PHP version in this file would override the account
+# default for woolkey.com/api/ too. After pointing the subdomain at this
+# folder, check cPanel → MultiPHP Manager that api.woolkey.com has a PHP
+# version set — without one, generate.php is served as plain text.
 # ============================================================
+
+
+# ------------------------------------------------------------
+# Routing
+# ------------------------------------------------------------
+#
+# Clean URLs for the subdomain, where /api/ is no longer part of the path.
+# Requests arriving as woolkey.com/api/generate are rewritten to
+# api/generate.php by the root file before these rules ever see them, so the
+# two sets never collide.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    RewriteRule ^generate/?$ generate.php [L,QSA]
+    RewriteRule ^health/?$   generate.php?health=1 [L]
+</IfModule>
+
+
+# ------------------------------------------------------------
+# Error documents — JSON, never HTML
+# ------------------------------------------------------------
+#
+# A client that gets an HTML error page where it expects JSON has to guess at
+# what went wrong. Blocked paths (config.php, a directory, a mistyped
+# endpoint) answer in the same shape as every other API error.
+#
+# The URL is host-dependent because the same directory sits at two different
+# depths depending on which hostname asked for it.
+
+<If "%{HTTP_HOST} =~ /^api\./">
+    ErrorDocument 403 /403.json
+    ErrorDocument 404 /404.json
+</If>
+<Else>
+    ErrorDocument 403 /api/403.json
+    ErrorDocument 404 /api/404.json
+</Else>
+
+
+# ------------------------------------------------------------
+# Security headers the root file would otherwise supply
+# ------------------------------------------------------------
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer"
+</IfModule>
+
+# Same reason: the root file's block on dotfiles and stray artefacts does not
+# reach the subdomain.
+<FilesMatch "(^\.ht|^\.env|^\.git|\.ini$|\.log$|\.(bak|backup|old|orig|save|swp|sql|dist)$)">
+    Require all denied
+</FilesMatch>
+
 
 # Apache strips the Authorization header before PHP sees it unless told not to.
 # Without this, "Authorization: Bearer <token>" fails while X-Api-Key works.

@@ -7,7 +7,7 @@
     "license": { "name": "MIT" }
   },
   "servers": [
-    { "url": "https://coolersheep.com/woolkey/api", "description": "Production" },
+    { "url": "https://api.woolkey.com", "description": "Production" },
     { "url": "/api", "description": "Relative to the deployed site root" }
   ],
   "security": [{ "ApiKeyHeader": [] }],

@@ -66,3 +66,6 @@ Thumbs.db
 *.pem
 *.key
 *.crt
+
+# Claude Code worktrees (transient, one git checkout each)
+.claude/worktrees/

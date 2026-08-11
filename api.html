@@ -38,44 +38,26 @@
   </div>
 
   <h3>How to get a key</h3>
-  <p><strong>Using the hosted WoolKey at coolersheep.com?</strong> Ask the site owner for a key.
-  Keys are handed out individually so usage can be traced and a single key can be revoked without
-  affecting anyone else.</p>
+  <p>Keys are issued individually, on request. You get your own rather than a shared one, so
+  usage stays traceable to a single key and any one key can be revoked without disturbing
+  anybody else.</p>
 
-  <p><strong>Running your own copy?</strong> You create the key yourself. On the server, in the
-  <code>api</code> folder:</p>
-
-  <div class="code-block">
-    <span class="code-label">Step 1 — create the config file</span>
-    <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>cp config.example.php config.php
-chmod 600 config.php</code></pre>
+  <div class="answer-box">
+    <p class="answer-lead">Ask for a key.</p>
+    <p>Get in touch through <a href="https://coolersheep.com">CoolerSheep</a> with a line about
+    what you plan to use it for, and you'll be sent one. There is nothing to install, register,
+    or configure at your end — a key and the <code>X-Api-Key</code> header is the whole setup.</p>
   </div>
 
-  <div class="code-block">
-    <span class="code-label">Step 2 — generate a random key</span>
-    <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"</code></pre>
-  </div>
-
-  <div class="code-block">
-    <span class="code-label">Step 3 — paste it into config.php</span>
-    <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>&lt;?php
-return [
-    'api_token' =&gt; 'paste-your-key-here',
-];</code></pre>
-  </div>
-
-  <p>That is all. <code>config.php</code> is blocked from the web and excluded from version
-  control, so the key cannot be downloaded or accidentally committed. Until you set one, the API
-  refuses to generate at all — it will not quietly run unprotected.</p>
+  <!-- Self-serve subscription: when the payment link exists, put the checkout
+       button here and reduce the paragraph above to the fallback for people
+       who would rather ask a human. -->
 
   <div class="callout callout-warn">
     <p><strong>Treat the key like a password.</strong> Keep it in an environment variable or a
     password manager, never in client-side JavaScript, a public repository, or a screenshot.
-    Anyone holding it can use your quota. To replace a key, edit <code>config.php</code> and
-    update your clients — there is nothing else to invalidate.</p>
+    Anyone holding it can use your quota. Need to replace one? Ask for a new key and update your
+    clients — the old one stops working, and there is nothing else to invalidate.</p>
   </div>
 
   <h2>Quick start</h2>
@@ -87,7 +69,7 @@ return [
       <p>No key needed for this one.</p>
       <div class="code-block">
         <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>curl https://coolersheep.com/woolkey/api/health</code></pre>
+<pre><code>curl https://api.woolkey.com/health</code></pre>
       </div>
       <p>You should get back <code>{"status":"ok", ...}</code>.</p>
     </li>
@@ -103,7 +85,7 @@ return [
       <h3>Generate a password</h3>
       <div class="code-block">
         <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>curl -X POST https://coolersheep.com/woolkey/api/generate \
+<pre><code>curl -X POST https://api.woolkey.com/generate \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: $WOOLKEY_KEY" \
   -d '{"mode":"password","options":{"length":24,"includeSymbols":true}}'</code></pre>
@@ -113,7 +95,7 @@ return [
   </ol>
 
   <h2>Endpoints</h2>
-  <p>Base URL: <code>https://coolersheep.com/woolkey/api</code></p>
+  <p>Base URL: <code>https://api.woolkey.com</code></p>
 
   <div class="endpoint"><span class="method">GET</span> <code>/health</code> <span>Is the API up? No key needed.</span></div>
   <div class="endpoint"><span class="method">GET</span> <code>/generate</code> <span>Describes every option and limit. No key needed.</span></div>
@@ -201,7 +183,7 @@ return [
 
   <div class="code-block">
     <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>curl -X POST https://coolersheep.com/woolkey/api/generate \
+<pre><code>curl -X POST https://api.woolkey.com/generate \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: $WOOLKEY_KEY" \
   -d '{"mode":"password","count":5,"options":{"length":32}}'</code></pre>
@@ -212,7 +194,7 @@ return [
   <h3>Passphrase</h3>
   <div class="code-block">
     <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>curl -X POST https://coolersheep.com/woolkey/api/generate \
+<pre><code>curl -X POST https://api.woolkey.com/generate \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: $WOOLKEY_KEY" \
   -d '{"mode":"passphrase","options":{"wordCount":6,"capitalize":true}}'</code></pre>
@@ -222,7 +204,7 @@ return [
   <h3>JavaScript</h3>
   <div class="code-block">
     <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>const res = await fetch('https://coolersheep.com/woolkey/api/generate', {
+<pre><code>const res = await fetch('https://api.woolkey.com/generate', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -244,7 +226,7 @@ const { value } = await res.json();</code></pre>
 <pre><code>import os, requests
 
 res = requests.post(
-    "https://coolersheep.com/woolkey/api/generate",
+    "https://api.woolkey.com/generate",
     headers={"X-Api-Key": os.environ["WOOLKEY_KEY"]},
     json={"mode": "password", "options": {"length": 24, "includeSymbols": True}},
     timeout=10,
@@ -263,7 +245,7 @@ password = res.json()["value"]</code></pre>
   <div class="code-block">
     <span class="code-label">Collection URL</span>
     <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>https://coolersheep.com/woolkey/api/woolkey.postman_collection.json</code></pre>
+<pre><code>https://api.woolkey.com/woolkey.postman_collection.json</code></pre>
   </div>
 
   <p>Then set your key: open the collection → <strong>Variables</strong> → paste it into
@@ -274,13 +256,34 @@ password = res.json()["value"]</code></pre>
   <em>3. Generate a password</em>.</p>
 
   <h3>Or download the files</h3>
-  <ul>
-    <li><a href="api/woolkey.postman_collection.json" download>woolkey.postman_collection.json</a>
-    — the six requests. Drag it onto the Postman window to import.</li>
-    <li><a href="api/woolkey.postman_environment.json" download>woolkey.postman_environment.json</a>
-    — optional environment holding <code>baseUrl</code> and <code>apiKey</code>, with the key
-    marked as a secret so Postman masks it on screen.</li>
-  </ul>
+  <p>Drag either file onto the Postman window to import it.</p>
+
+  <div class="postman-downloads">
+    <a class="postman-btn" href="api/woolkey.postman_collection.json" download>
+      <svg class="postman-mark" viewBox="0 0 48 48" role="img" aria-label="Postman">
+        <circle cx="24" cy="24" r="24" fill="#FF6C37"/>
+        <path fill="#fff" d="M31.8 16.2c-3.1-3.1-8.1-3.1-11.2 0l-1.4 1.4c-1.5 1.5-2.4 3.6-2.4 5.7l-2.6 6.9c-.2.5-.1 1 .3 1.4.4.4.9.5 1.4.3l6.9-2.6c2.1 0 4.2-.8 5.7-2.4l1.4-1.4c3.1-3.1 3.1-8.2-.1-11.3zm-1.7 1.7c1.9 1.9 2.1 4.8.6 6.9l-1.6-1.6a1 1 0 0 0-1.4 1.4l1.6 1.6c-2.1 1.5-5 1.3-6.9-.6-2.1-2.1-2.1-5.6 0-7.7 2.1-2.1 5.6-2.1 7.7 0zM18.4 27.2l1.5 1.5-2.9 1.1c-.3.1-.6-.2-.5-.5l1.1-2.9c.3.3.5.6.8.8z"/>
+      </svg>
+      <span class="postman-btn-text">
+        <strong>Collection</strong>
+        <small>woolkey.postman_collection.json — the six requests, with tests</small>
+      </span>
+    </a>
+
+    <a class="postman-btn" href="api/woolkey.postman_environment.json" download>
+      <svg class="postman-mark" viewBox="0 0 48 48" role="img" aria-label="Postman">
+        <circle cx="24" cy="24" r="24" fill="#FF6C37"/>
+        <path fill="#fff" d="M31.8 16.2c-3.1-3.1-8.1-3.1-11.2 0l-1.4 1.4c-1.5 1.5-2.4 3.6-2.4 5.7l-2.6 6.9c-.2.5-.1 1 .3 1.4.4.4.9.5 1.4.3l6.9-2.6c2.1 0 4.2-.8 5.7-2.4l1.4-1.4c3.1-3.1 3.1-8.2-.1-11.3zm-1.7 1.7c1.9 1.9 2.1 4.8.6 6.9l-1.6-1.6a1 1 0 0 0-1.4 1.4l1.6 1.6c-2.1 1.5-5 1.3-6.9-.6-2.1-2.1-2.1-5.6 0-7.7 2.1-2.1 5.6-2.1 7.7 0zM18.4 27.2l1.5 1.5-2.9 1.1c-.3.1-.6-.2-.5-.5l1.1-2.9c.3.3.5.6.8.8z"/>
+      </svg>
+      <span class="postman-btn-text">
+        <strong>Environment</strong>
+        <small>woolkey.postman_environment.json — optional, holds <code>baseUrl</code> and a masked <code>apiKey</code></small>
+      </span>
+    </a>
+  </div>
+
+  <p class="postman-note">Both files download straight from this site — no Postman account, and
+  nothing published to a public workspace.</p>
 
   <h3>What's in the collection</h3>
   <div class="table-scroll">
@@ -305,7 +308,7 @@ password = res.json()["value"]</code></pre>
 
   <h3>By hand</h3>
   <p>If you would rather set it up yourself: method <code>POST</code>, URL
-  <code>https://coolersheep.com/woolkey/api/generate</code>, headers
+  <code>https://api.woolkey.com/generate</code>, headers
   <code>Content-Type: application/json</code> and <code>X-Api-Key: your-key</code>, then
   body → raw → JSON with any of the bodies above. Importing
   <code>openapi.json</code> the same way works too, though it produces bare requests with no
@@ -317,7 +320,7 @@ password = res.json()["value"]</code></pre>
 
   <div class="code-block">
     <button type="button" class="copy-code" data-copy>Copy</button>
-<pre><code>curl https://coolersheep.com/woolkey/api/generate</code></pre>
+<pre><code>curl https://api.woolkey.com/generate</code></pre>
   </div>
 
   <p>For a tool definition, hand the agent the <code>POST /generate</code> schema from
@@ -347,7 +350,7 @@ password = res.json()["value"]</code></pre>
         <tr><td><code>401</code></td><td>Key missing or wrong</td><td>Check the <code>X-Api-Key</code> header</td></tr>
         <tr><td><code>413</code></td><td>Request body over 16 KB</td><td>Send a smaller body</td></tr>
         <tr><td><code>429</code></td><td>Too many requests</td><td>Wait the number of seconds in <code>Retry-After</code></td></tr>
-        <tr><td><code>503</code></td><td>No key configured on the server</td><td>Only on self-hosted copies — set <code>api_token</code></td></tr>
+        <tr><td><code>503</code></td><td>No key configured on the server</td><td>Nothing you can fix from the client — let the operator know</td></tr>
       </tbody>
     </table>
   </div>
