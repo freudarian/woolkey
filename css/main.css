@@ -79,15 +79,22 @@ a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; 
    landing, 404 and offline pages; the long-form prose pages stay on the
    flat background so body text keeps its full contrast. */
 
+/* Glass, in the Apple sense: thin enough to read the scene through, held
+   together by a bright top edge and a heavy drop shadow rather than by
+   opacity. The saturation boost is what stops a blurred photo going grey. */
 :root {
-  --panel-bg:    rgba(26, 29, 39, 0.72);
-  --panel-line:  rgba(255, 255, 255, 0.14);
-  --chrome-bg:   rgba(15, 17, 23, 0.55);
+  --panel-bg:     rgba(26, 29, 39, 0.52);
+  --panel-line:   rgba(255, 255, 255, 0.18);
+  --panel-sheen:  rgba(255, 255, 255, 0.16);
+  --panel-shadow: 0 12px 40px rgba(0, 0, 0, 0.34);
+  --chrome-bg:    rgba(15, 17, 23, 0.42);
 }
 :root[data-theme="light"] {
-  --panel-bg:    rgba(255, 255, 255, 0.74);
-  --panel-line:  rgba(22, 26, 36, 0.12);
-  --chrome-bg:   rgba(245, 247, 251, 0.62);
+  --panel-bg:     rgba(255, 255, 255, 0.55);
+  --panel-line:   rgba(255, 255, 255, 0.65);
+  --panel-sheen:  rgba(255, 255, 255, 0.75);
+  --panel-shadow: 0 12px 40px rgba(26, 29, 39, 0.16);
+  --chrome-bg:    rgba(245, 247, 251, 0.5);
 }
 
 /* The colour lives on <html> so the two photo layers can sit behind the
@@ -156,18 +163,17 @@ body.scenic::after {
    veil and blurs whatever sheep sit behind it.
 
    The card is also the one panel that changes size — a long password wraps
-   onto more lines and the card grows under the length slider. Every resize
-   forces the blur to be recomputed, so the backdrop behind it is kept as
-   cheap and as static as possible: the photo layers are composited (above)
-   and the fireflies are painted in front of the card rather than behind it
-   (fireflies.css), which takes 15 continuously animating elements out of
-   the blur entirely. */
+   onto more lines and the card grows under the length slider — and every
+   resize recomputes the blur. The fireflies drift behind the glass, so that
+   backdrop is never static; the photo layers are composited and the card
+   holds its own layer to keep the cost down. */
 body.scenic .card,
 body.scenic .error-page {
   background: var(--panel-bg);
   border: 1px solid var(--panel-line);
-  backdrop-filter: blur(12px) saturate(135%);
-  -webkit-backdrop-filter: blur(12px) saturate(135%);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--panel-sheen), var(--panel-shadow);
 }
 body.scenic .card {
   /* Holds the blurred result on its own compositor layer across resizes,
@@ -178,17 +184,18 @@ body.scenic .error-page {
   max-width: 34rem;
   margin: 2.5rem auto;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
   min-height: 0;
   padding: 3rem 2rem;
+  /* No box-shadow here: it would land after the rule above and drop the
+     sheen that gives the panel its top edge. */
 }
 
 body.scenic .site-header,
 body.scenic .site-footer {
   background: var(--chrome-bg);
   border-color: var(--panel-line);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
 /* Without backdrop-filter the veil alone is not enough to separate text
@@ -213,14 +220,21 @@ body.scenic .site-footer {
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
   font-weight: 900;            /* the top of Inter's variable weight axis */
   letter-spacing: -0.015em;    /* heavy weights need the tracking pulled in */
-  font-size: 1.15rem;
+  font-size: 1.45rem;
   color: var(--color-text);
   text-decoration: none;
 }
-.logo img { flex-shrink: 0; display: block; }
+/* The source GIF is 112×120, so it was being squashed into a 28px square as
+   well as scaled down. Height drives, width follows, ratio preserved. */
+.logo img {
+  flex-shrink: 0;
+  display: block;
+  height: 2.5rem;
+  width: auto;
+}
 .logo:hover { text-decoration: none; }
 .theme-switcher {
   display: inline-flex;

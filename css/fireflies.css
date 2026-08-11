@@ -15,12 +15,12 @@
 .fireflies {
   position: fixed;
   inset: 0;
-  /* In front of the page, not behind it. Behind the card they would sit
-     inside the frosted panel's backdrop, and 15 elements animating forever
-     means that blur can never be cached — which showed up as the card
-     glitching while the length slider was dragged. pointer-events stays
-     none, so nothing here can be clicked. */
-  z-index: 3;
+  /* Between the photo layers (-2) and the page content, so the swarm drifts
+     behind the glass and is seen through it. That does put 15 permanently
+     animating elements inside the frosted panels' backdrop, which the
+     compositor cannot cache — acceptable now that the card no longer
+     changes width on every keystroke. pointer-events stays none. */
+  z-index: -1;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
