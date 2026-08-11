@@ -167,11 +167,10 @@ body.scenic::after {
 /* Frosted panels. The card is the reading surface, so it keeps a solid-ish
    veil and blurs whatever sheep sit behind it.
 
-   The card holds a fixed width and, now that the output scrolls on one line
-   instead of wrapping, a near-fixed height too — so the blur is rarely
-   recomputed for geometry. It still cannot be cached, because the fireflies
-   drift behind the glass; the photo layers are composited and the card holds
-   its own layer to keep that cost down. */
+   The card holds a fixed width but grows taller as the generated value wraps,
+   and every resize recomputes the blur. The fireflies drift behind the glass
+   too, so that backdrop is never static; the photo layers are composited and
+   the card holds its own layer to keep the cost down. */
 body.scenic .card,
 body.scenic .error-page {
   background: var(--panel-bg);
@@ -332,16 +331,11 @@ main {
   letter-spacing: 0.03em;
   user-select: text;
   color: var(--color-text);
-  /* One line, always. A 128-character password scrolls sideways inside the
-     box rather than wrapping, which also stops the card growing taller as
-     the length slider moves. min-width:0 is what lets a flex item shrink
-     below its content and scroll at all. */
+  /* Show the whole value, however long. It wraps rather than scrolling, so
+     the card does grow with the password — that is the accepted trade for
+     never hiding part of a credential behind a scrollbar. */
   min-width: 0;
-  white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  word-break: break-all;
 }
 .visibility-btn {
   flex-shrink: 0;
