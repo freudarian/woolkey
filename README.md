@@ -12,7 +12,7 @@ metadata, same validation rules.
 
 | | Transport | Use when |
 |---|---|---|
-| **HTTP** | `POST /api/generate` | The agent speaks HTTP (Postman, curl, tool-calling agents, CI) |
+| **HTTP** | `POST /generate` | The agent speaks HTTP (Postman, curl, tool-calling agents, CI) |
 | **In-page** | `window.WoolKeyAPI` | The agent drives a real browser session |
 
 Both are **stateless**. Nothing generated is stored, logged, or retained on the
@@ -235,7 +235,7 @@ Loaded by `index.html` as `js/agent-api.js`. `window.WoolKeyAPI` exposes:
 |---|---|
 | `version` | API version string |
 | `ready` | `true` once the API is attached |
-| `describe()` | Capability descriptor, mirroring `GET /api/generate` |
+| `describe()` | Capability descriptor, mirroring `GET /generate` |
 | `generate(input)` | Returns `{ ok: true, data }` or `{ ok: false, error, field? }` |
 | `generateCredential(input)` | Same, but throws on invalid input |
 
