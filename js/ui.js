@@ -68,8 +68,14 @@ function updateToggleLabel() {
   const eye    = document.getElementById('icon-eye');
   // _hidden=true  → password masked   → show closed-eye so user can click to reveal
   // _hidden=false → password visible  → show open-eye so user can click to hide
-  if (eyeOff) eyeOff.style.display = _hidden  ? '' : 'none';
-  if (eye)    eye.style.display    = _hidden  ? 'none' : '';
+  //
+  // Both branches must name a real value. Assigning '' removes the inline
+  // style rather than setting one, which drops #icon-eye back onto its
+  // stylesheet rule — and that rule is `display: none`, the pre-script state
+  // that stops both icons flashing at once. The open eye could therefore
+  // never appear, and the revealed state rendered an empty button.
+  if (eyeOff) eyeOff.style.display = _hidden ? 'block' : 'none';
+  if (eye)    eye.style.display    = _hidden ? 'none'  : 'block';
   btn.setAttribute('aria-label', _hidden ? 'Show password' : 'Hide password');
   btn.setAttribute('aria-pressed', String(!_hidden));
 }
