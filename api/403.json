@@ -1,0 +1,6 @@
+{
+  "error": "Forbidden. That path exists but is not part of the public API.",
+  "status": 403,
+  "endpoints": ["GET /health", "GET /generate", "GET /openapi.json", "POST /generate"],
+  "docs": "https://woolkey.com/api.html"
+}

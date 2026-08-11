@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "9f2c1d54-6b83-4d0e-9a17-c4e5b8a71d20",
     "name": "WoolKey Credential Generator",
-    "description": "Generate cryptographically secure passwords and passphrases over HTTP.\n\n## Before you start\n\nSet the `apiKey` variable. Open the collection, go to **Variables**, and paste your key into the **Current value** column — that column stays on your machine and is not shared if you export or fork this collection.\n\nNo key? See https://coolersheep.com/woolkey/api.html\n\n`baseUrl` already points at the hosted instance. Change it if you run your own copy.\n\n## Authentication\n\nSet once at the collection level as `X-Api-Key`, so every request inherits it. The two read-only requests override this to no auth, because they do not need a key.\n\n## A note on the generated values\n\nThese requests deliberately do not save the generated password into a Postman variable. Collection and environment values are written to disk, and a password generator that quietly leaves copies lying around would be missing the point. Copy what you need from the response body straight into your password manager.\n\n## Rate limit\n\n20 requests per minute per IP. Every response carries `X-RateLimit-Remaining` and `X-RateLimit-Reset`. Use the batch request instead of a Collection Runner loop.",
+    "description": "Generate cryptographically secure passwords and passphrases over HTTP.\n\n## Before you start\n\nSet the `apiKey` variable. Open the collection, go to **Variables**, and paste your key into the **Current value** column — that column stays on your machine and is not shared if you export or fork this collection.\n\nNo key? See https://woolkey.com/api.html\n\n`baseUrl` already points at the hosted API at api.woolkey.com. Change it only if you have been given a different host.\n\n## Authentication\n\nSet once at the collection level as `X-Api-Key`, so every request inherits it. The two read-only requests override this to no auth, because they do not need a key.\n\n## A note on the generated values\n\nThese requests deliberately do not save the generated password into a Postman variable. Collection and environment values are written to disk, and a password generator that quietly leaves copies lying around would be missing the point. Copy what you need from the response body straight into your password manager.\n\n## Rate limit\n\n20 requests per minute per IP. Every response carries `X-RateLimit-Remaining` and `X-RateLimit-Reset`. Use the batch request instead of a Collection Runner loop.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,7 +16,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://coolersheep.com/woolkey/api",
+      "value": "https://api.woolkey.com",
       "type": "string",
       "description": "Base URL of the WoolKey API. Change this if you self-host."
     },

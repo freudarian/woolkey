@@ -28,7 +28,7 @@ return [
     /**
      * CORS origins permitted to call the endpoint from a browser.
      * Use ['*'] for any origin (safe here: auth is a header, not a cookie),
-     * or list exact origins, e.g. ['https://coolersheep.com'].
+     * or list exact origins, e.g. ['https://woolkey.com'].
      */
     'allowed_origins' => ['*'],
 

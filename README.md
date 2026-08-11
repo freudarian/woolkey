@@ -28,7 +28,7 @@ your password manager.
 
 ## HTTP endpoint
 
-Base URL: `https://coolersheep.com/woolkey/api`
+Base URL: `https://api.woolkey.com`
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
@@ -143,25 +143,25 @@ single-result callers can ignore `results` entirely.
 Password:
 
 ```bash
-curl -X POST https://coolersheep.com/woolkey/api/generate -H "Content-Type: application/json" -H "X-Api-Key: $WOOLKEY_TOKEN" -d '{"mode":"password","options":{"length":32,"includeSymbols":true,"avoidAmbiguous":true}}'
+curl -X POST https://api.woolkey.com/generate -H "Content-Type: application/json" -H "X-Api-Key: $WOOLKEY_TOKEN" -d '{"mode":"password","options":{"length":32,"includeSymbols":true,"avoidAmbiguous":true}}'
 ```
 
 Passphrase:
 
 ```bash
-curl -X POST https://coolersheep.com/woolkey/api/generate -H "Content-Type: application/json" -H "X-Api-Key: $WOOLKEY_TOKEN" -d '{"mode":"passphrase","options":{"wordCount":6,"capitalize":true}}'
+curl -X POST https://api.woolkey.com/generate -H "Content-Type: application/json" -H "X-Api-Key: $WOOLKEY_TOKEN" -d '{"mode":"passphrase","options":{"wordCount":6,"capitalize":true}}'
 ```
 
 Batch of five:
 
 ```bash
-curl -X POST https://coolersheep.com/woolkey/api/generate -H "Content-Type: application/json" -H "X-Api-Key: $WOOLKEY_TOKEN" -d '{"mode":"password","count":5,"options":{"length":24}}'
+curl -X POST https://api.woolkey.com/generate -H "Content-Type: application/json" -H "X-Api-Key: $WOOLKEY_TOKEN" -d '{"mode":"password","count":5,"options":{"length":24}}'
 ```
 
 Discover the contract:
 
 ```bash
-curl https://coolersheep.com/woolkey/api/generate
+curl https://api.woolkey.com/generate
 ```
 
 ### Postman
@@ -171,7 +171,7 @@ A ready-made collection lives at
 **Import → Link**, paste the URL, **Continue**:
 
 ```
-https://coolersheep.com/woolkey/api/woolkey.postman_collection.json
+https://api.woolkey.com/woolkey.postman_collection.json
 ```
 
 Then set `apiKey` under the collection's **Variables** tab, in the **Current value**
@@ -190,12 +190,18 @@ are persisted to disk.
 An optional environment is at `api/woolkey.postman_environment.json`, with `apiKey`
 typed as `secret` so Postman masks it.
 
+Both files are also offered as branded download buttons on `api.html`, served
+straight from this site. That is the deliberate answer to the "Run in Postman"
+button below: sharing a collection *and* an environment from Postman's cloud needs a
+paid plan, and a download link needs no account on either side.
+
 #### Getting a true one-click "Run in Postman" button
 
 The button Postman renders as a one-click link requires the collection to live in a
 **public Postman workspace** — it is served from Postman's cloud, not from this
-server, so it cannot be produced from the repo alone. It needs a free Postman
-account. Once you have one:
+server, so it cannot be produced from the repo alone. Sharing a collection this way
+needs a Postman account, and sharing an environment alongside it needs a paid one.
+If you decide it is worth it:
 
 1. Import the collection above into Postman.
 2. Move it into a public workspace (**Workspace settings → Visibility → Public**).
@@ -266,6 +272,29 @@ than accepting it and quietly generating with system entropy only.
 
 Deployed on cPanel (Apache, PHP 8.3) at `~/public_html/woolkey/`.
 
+### Hosts
+
+| Host | Document root | Serves |
+|---|---|---|
+| `woolkey.com` | `~/public_html/woolkey/` | the generator, the docs, `/api/…` as a path |
+| `api.woolkey.com` | `~/public_html/woolkey/api/` | the API at the root: `/health`, `/generate`, `/openapi.json` |
+
+Both hostnames reach the same PHP file. `base_path()` in `generate.php` derives the
+prefix from `SCRIPT_NAME`, so the capability descriptor advertises `/generate` on the
+subdomain and `/api/generate` on the main domain without being told which it is.
+
+Two things follow from the subdomain having its own document root:
+
+- **The root `.htaccess` is never read for `api.woolkey.com`.** The HTTPS redirect,
+  the clean-URL rewrites, the security headers and the dotfile blocks are repeated in
+  `api/.htaccess` for exactly this reason. Anything added to the root file that the
+  API depends on has to be added there too.
+- **Check MultiPHP.** cPanel → MultiPHP Manager must have a PHP version set for
+  `api.woolkey.com`. Without one, Apache has no handler for `.php` under that
+  document root and `generate.php` is served as plain text.
+
+### Steps
+
 1. Upload the repository contents, including `api/`.
 2. Create the config:
 
@@ -286,7 +315,7 @@ Deployed on cPanel (Apache, PHP 8.3) at `~/public_html/woolkey/`.
 4. Verify:
 
    ```bash
-   curl https://coolersheep.com/woolkey/api/health
+   curl https://api.woolkey.com/health
    ```
 
 `config.php` is blocked from the web by `api/.htaccess` (and by the root

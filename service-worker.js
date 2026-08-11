@@ -10,7 +10,7 @@
 // so a returning visitor keeps serving the old bundle until this string
 // changes: that is what triggers the browser to install a new worker, populate
 // a fresh cache, and drop the previous one in activate.
-const CACHE_NAME = 'woolkey-v8';
+const CACHE_NAME = 'woolkey-v9';
 const BASE_PATH = self.location.pathname.replace(/[^/]+$/, '');
 function assetPath(path) {
   return BASE_PATH + path;
@@ -28,8 +28,11 @@ const STATIC_ASSETS = [
   assetPath('api.html'),
   assetPath('offline.html'),
   assetPath('404.html'),
+  assetPath('403.html'),
   assetPath('css/main.css?v=4'),
+  assetPath('css/fireflies.css?v=4'),
   assetPath('js/site.js?v=4'),
+  assetPath('js/fireflies.js?v=4'),
   assetPath('js/crypto-random.js?v=4'),
   assetPath('js/user-entropy.js?v=4'),
   assetPath('js/entropy.js?v=4'),
@@ -44,6 +47,13 @@ const STATIC_ASSETS = [
   assetPath('manifest.webmanifest'),
   assetPath('assets/favicon.png'),
   assetPath('assets/logo.gif'),
+  assetPath('assets/Inter-Variable.woff2'),
+  // Both background photos, so the offline page still gets its scene and a
+  // theme switch made offline still has something to fade to. WebP only:
+  // the JPGs are a fallback for browsers that predate it, and those predate
+  // service workers too.
+  assetPath('assets/herd-of-sheep-day.webp'),
+  assetPath('assets/herd-of-sheep-night.webp'),
 ];
 
 self.addEventListener('install', (event) => {
