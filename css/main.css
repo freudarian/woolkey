@@ -492,6 +492,10 @@ main {
 .field-row label { font-size: 0.9rem; white-space: nowrap; }
 .field-row input[type="text"],
 .field-row select {
+  /* A flex item defaults to min-width:auto, so the input refuses to shrink
+     below the ~20 characters its size attribute implies and hangs off the
+     side of a phone. */
+  min-width: 0;
   flex: 1;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -517,7 +521,11 @@ main {
 .privacy-badge strong { color: var(--color-text); }
 
 /* ── Static page content ─────────────────────────────────────── */
-.prose { max-width: 680px; margin: 2rem auto; padding: 0 1.25rem 4rem; }
+/* width:100% for the same reason as main: <body> is a flex column, and a flex
+   item with auto cross-axis margins is sized to its content rather than
+   stretched. Without it this article grows to its max-content width — 658px
+   of prose on a 375px phone, dragging the whole page sideways. */
+.prose { width: 100%; max-width: 680px; margin: 2rem auto; padding: 0 1.25rem 4rem; }
 .prose h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
 .prose h2 { font-size: 1.2rem; margin: 1.75rem 0 0.5rem; color: var(--color-primary); }
 .prose p  { color: var(--color-muted); margin-bottom: 0.75rem; }
@@ -799,6 +807,13 @@ main {
   .actions { flex-direction: column; }
   .actions .btn { width: 100%; justify-content: center; }
   .option-row input[type="range"] { width: 100px; }
+
+  /* Side by side, the label leaves the control about 135px on a phone —
+     enough to not overflow, not enough to read what you typed. Stack them. */
+  .field-row { flex-wrap: wrap; gap: 0.35rem; }
+  .field-row label { flex: 1 0 100%; }
+  .field-row input[type="text"],
+  .field-row select { flex: 1 0 100%; }
 }
 
 /* ── Reduced motion ──────────────────────────────────────────── */

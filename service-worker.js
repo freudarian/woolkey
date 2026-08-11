@@ -10,7 +10,7 @@
 // so a returning visitor keeps serving the old bundle until this string
 // changes: that is what triggers the browser to install a new worker, populate
 // a fresh cache, and drop the previous one in activate.
-const CACHE_NAME = 'woolkey-v10';
+const CACHE_NAME = 'woolkey-v11';
 const BASE_PATH = self.location.pathname.replace(/[^/]+$/, '');
 function assetPath(path) {
   return BASE_PATH + path;
