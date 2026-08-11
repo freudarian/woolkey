@@ -184,10 +184,16 @@ Options -Indexes
 # Protect common configuration / repository files.
 #
 # IMPORTANT:
-# The original Copilot regex used (^.|...)
-# That "." matches ANY character and could accidentally block everything.
+# The leading dot below is escaped. The original Copilot regex used (^.|...)
+# where "." matches ANY character, which would block every file on the site.
+# "^\." matches only a literal leading dot — that is, every dotfile.
+#
+# Naming individual dotfiles (^\.ht, ^\.env, ^\.git) meant anything not on the
+# list was served: a stray .ssh, .npmrc or .netrc would have been readable by
+# name. FilesMatch tests the final path segment only, so blocking all dotfiles
+# does not touch /.well-known/ — an ACME challenge basename carries no dot.
 
-<FilesMatch "(^\.ht|^\.env|^\.git|\.ini$|\.log$|composer\.(json|lock)$|package(-lock)?\.json$|config\.php$|config\.example\.php$)">
+<FilesMatch "(^\.|\.ini$|\.log$|composer\.(json|lock)$|package(-lock)?\.json$|config\.php$|config\.example\.php$)">
     Require all denied
 </FilesMatch>
 
@@ -196,7 +202,9 @@ Options -Indexes
 # Prevent access to common backup/source files
 # ------------------------------------------------------------
 
-<FilesMatch "\.(bak|backup|old|orig|save|swp|sql|dist)$">
+# Key and certificate extensions are here rather than above because they carry
+# no leading dot: deploy.key and server.pem are ordinary filenames.
+<FilesMatch "\.(bak|backup|old|orig|save|swp|sql|dist|pem|key|ppk|crt|p12|pfx)$">
     Require all denied
 </FilesMatch>
 

@@ -69,8 +69,10 @@
 </IfModule>
 
 # Same reason: the root file's block on dotfiles and stray artefacts does not
-# reach the subdomain.
-<FilesMatch "(^\.ht|^\.env|^\.git|\.ini$|\.log$|\.(bak|backup|old|orig|save|swp|sql|dist)$)">
+# reach the subdomain. "^\." covers every dotfile rather than a named few, so a
+# stray .ssh or .netrc is denied without needing to be anticipated; the
+# extension list catches key material, which carries no leading dot.
+<FilesMatch "(^\.|\.ini$|\.log$|\.(bak|backup|old|orig|save|swp|sql|dist|pem|key|ppk|crt|p12|pfx)$)">
     Require all denied
 </FilesMatch>
 
