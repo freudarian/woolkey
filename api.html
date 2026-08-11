@@ -370,6 +370,11 @@ password = res.json()["value"]</code></pre>
   and proxies are told not to keep a copy either. See <a href="security.html">Security</a> for the
   full picture.</p>
 
+  <p>The one thing this endpoint does write is the rate-limit counter — request timestamps under
+  a hash of your IP address, carrying no credential and never linked to what was generated. It is
+  spelled out in the <a href="privacy.html#rate-limiting">privacy policy</a>, because a claim
+  like "nothing is stored" is worth stating precisely rather than generously.</p>
+
   <h2>In-browser alternative</h2>
   <p>If your agent drives a real browser rather than speaking HTTP, this page's generator is
   available directly on the WoolKey home page as <code>window.WoolKeyAPI</code> —

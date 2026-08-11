@@ -72,9 +72,12 @@
   entirely in the browser and the server never sees your passwords.</p>
   <p>WoolKey additionally offers an opt-in <a href="api.html">HTTP API</a> for scripts and AI
   agents, where generation necessarily happens on the server. That endpoint is separate: it is
-  never used by this website, requires an API key, and stores nothing — no database, no log of
-  generated values. The <code>connect-src 'none'</code> policy above means the pages you are
-  reading cannot call it even if they wanted to.</p>
+  never used by this website, requires an API key, and keeps no generated value — no database,
+  no log of what was produced. The one thing it does write is a rate-limit counter: request
+  timestamps under a hash of the caller's address, holding no credential and described in full
+  in the <a href="privacy.html#rate-limiting">privacy policy</a>. The
+  <code>connect-src 'none'</code> policy above means the pages you are reading cannot call the
+  endpoint even if they wanted to.</p>
 
   <h2>Offline support</h2>
   <p>After the first visit, WoolKey's service worker caches all static assets. The application
