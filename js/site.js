@@ -33,6 +33,15 @@
     return localStorage.getItem(STORAGE_KEY) || 'system';
   }
 
+  // Settle the theme before DOMContentLoaded: the scenic pages cross-fade
+  // between two background photos, and .theme-ready is what tells the
+  // stylesheet that fade is allowed. Set it after the first apply so the
+  // initial paint picks a photo outright instead of animating into it.
+  document.documentElement.dataset.theme = resolveTheme(getStoredTheme());
+  const markThemeReady = () => document.documentElement.classList.add('theme-ready');
+  requestAnimationFrame(markThemeReady);
+  setTimeout(markThemeReady, 200);   // rAF never fires in a background tab
+
   function setCurrentYear() {
     const year = String(new Date().getFullYear());
     document.querySelectorAll('[data-current-year]').forEach((node) => {

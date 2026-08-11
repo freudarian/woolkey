@@ -1,5 +1,21 @@
+/* ── Fonts ────────────────────────────────────────────────────── */
+/* One variable file covers the whole 100–900 range, so the 900-weight logo
+   costs nothing extra. Subset from the TTF in assets/ down to Latin +
+   Latin-Ext — see tools/make-inter-woff2.py to rebuild it. */
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/Inter-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Reset & base ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Form controls opt out of the inherited font by default, which would leave
+   the buttons and inputs on the system UI face while everything else is Inter. */
+button, input, select, textarea { font-family: inherit; }
 
 :root {
   --color-bg:         #0f1117;
@@ -41,16 +57,148 @@
 
 html { font-size: 16px; }
 body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
-  min-height: 100vh;
   line-height: 1.6;
+  /* Column layout so a short page (404, offline) still parks its footer at
+     the bottom of the screen instead of leaving it halfway up. dvh tracks
+     the mobile URL bar; the vh line is the fallback for browsers without it. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 a { color: var(--color-primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: 2px; }
+
+/* ── Scenic background ────────────────────────────────────────── */
+/* Opt-in per page with <body class="scenic">. The photo pages are the
+   landing, 404 and offline pages; the long-form prose pages stay on the
+   flat background so body text keeps its full contrast. */
+
+:root {
+  --panel-bg:    rgba(26, 29, 39, 0.72);
+  --panel-line:  rgba(255, 255, 255, 0.14);
+  --chrome-bg:   rgba(15, 17, 23, 0.55);
+}
+:root[data-theme="light"] {
+  --panel-bg:    rgba(255, 255, 255, 0.74);
+  --panel-line:  rgba(22, 26, 36, 0.12);
+  --chrome-bg:   rgba(245, 247, 251, 0.62);
+}
+
+/* The colour lives on <html> so the two photo layers can sit behind the
+   page content on a negative z-index without being painted over by the
+   body's own background. */
+html { background: var(--color-bg); }
+body.scenic { background: transparent; }
+
+/* One fixed layer per theme, both always present and only the active one
+   at full opacity — that is what makes the theme switch a cross-fade
+   rather than a swap. Each layer carries a scrim gradient above the photo
+   so header, footer and card text stay legible over the busy areas. */
+body.scenic::before,
+body.scenic::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center bottom;   /* horizon anchored to the bottom */
+  background-size: cover;               /* fill, never distort */
+  transition: opacity 700ms ease;
+  /* Promote both layers. The frosted panels blur whatever sits behind them,
+     and a composited backdrop can be sampled from a cached texture instead
+     of being re-rasterised every time the card changes height. */
+  transform: translateZ(0);
+}
+
+/* Day. The plain url() line is the fallback for browsers without
+   image-set(); they simply never see the second declaration. */
+body.scenic::before {
+  opacity: 0;
+  background-image:
+    linear-gradient(180deg, rgba(245,247,251,0.62) 0%, rgba(245,247,251,0.30) 38%, rgba(245,247,251,0.50) 100%),
+    url(../assets/herd-of-sheep-day.jpg);
+  background-image:
+    linear-gradient(180deg, rgba(245,247,251,0.62) 0%, rgba(245,247,251,0.30) 38%, rgba(245,247,251,0.50) 100%),
+    image-set(url(../assets/herd-of-sheep-day.webp) type("image/webp"),
+              url(../assets/herd-of-sheep-day.jpg) type("image/jpeg"));
+}
+
+/* Night. */
+body.scenic::after {
+  opacity: 1;
+  background-image:
+    linear-gradient(180deg, rgba(15,17,23,0.58) 0%, rgba(15,17,23,0.32) 38%, rgba(15,17,23,0.55) 100%),
+    url(../assets/herd-of-sheep-night.jpg);
+  background-image:
+    linear-gradient(180deg, rgba(15,17,23,0.58) 0%, rgba(15,17,23,0.32) 38%, rgba(15,17,23,0.55) 100%),
+    image-set(url(../assets/herd-of-sheep-night.webp) type("image/webp"),
+              url(../assets/herd-of-sheep-night.jpg) type("image/jpeg"));
+}
+
+:root[data-theme="light"] body.scenic::before { opacity: 1; }
+:root[data-theme="light"] body.scenic::after  { opacity: 0; }
+
+/* site.js adds .theme-ready once the stored theme has been applied, so the
+   very first paint settles on the right photo instantly instead of playing
+   a night-to-day fade at every load. */
+:root:not(.theme-ready) body.scenic::before,
+:root:not(.theme-ready) body.scenic::after,
+:root:not(.theme-ready) .fireflies { transition: none; }
+
+/* Frosted panels. The card is the reading surface, so it keeps a solid-ish
+   veil and blurs whatever sheep sit behind it.
+
+   The card is also the one panel that changes size — a long password wraps
+   onto more lines and the card grows under the length slider. Every resize
+   forces the blur to be recomputed, so the backdrop behind it is kept as
+   cheap and as static as possible: the photo layers are composited (above)
+   and the fireflies are painted in front of the card rather than behind it
+   (fireflies.css), which takes 15 continuously animating elements out of
+   the blur entirely. */
+body.scenic .card,
+body.scenic .error-page {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-line);
+  backdrop-filter: blur(12px) saturate(135%);
+  -webkit-backdrop-filter: blur(12px) saturate(135%);
+}
+body.scenic .card {
+  /* Holds the blurred result on its own compositor layer across resizes,
+     which is what stops the smearing while the slider is dragged. */
+  will-change: backdrop-filter;
+}
+body.scenic .error-page {
+  max-width: 34rem;
+  margin: 2.5rem auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  min-height: 0;
+  padding: 3rem 2rem;
+}
+
+body.scenic .site-header,
+body.scenic .site-footer {
+  background: var(--chrome-bg);
+  border-color: var(--panel-line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Without backdrop-filter the veil alone is not enough to separate text
+   from the photo, so those browsers get the opaque surfaces back. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body.scenic .card,
+  body.scenic .error-page { background: var(--color-surface); }
+  body.scenic .site-header,
+  body.scenic .site-footer { background: var(--color-bg); }
+}
 
 /* ── Layout ───────────────────────────────────────────────────── */
 .site-header {
@@ -66,7 +214,8 @@ a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; 
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-weight: 700;
+  font-weight: 900;            /* the top of Inter's variable weight axis */
+  letter-spacing: -0.015em;    /* heavy weights need the tracking pulled in */
   font-size: 1.15rem;
   color: var(--color-text);
   text-decoration: none;
@@ -100,6 +249,11 @@ a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; 
 .theme-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
 main {
+  /* width:100% is load-bearing. <body> is a flex column (see the footer),
+     and a flex item with auto cross-axis margins is not stretched — it gets
+     sized to its content instead. Without this the card breathes in and out
+     as the generated password gets longer or shorter. */
+  width: 100%;
   max-width: 680px;
   margin: 2.5rem auto;
   padding: 0 1.25rem 4rem;
@@ -506,6 +660,50 @@ main {
   .copy-code { opacity: 1; }
 }
 
+/* Postman download buttons. Files are served from this site, so these are
+   plain download links dressed as cards — no Postman account involved. */
+.postman-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 0.75rem;
+}
+.postman-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1 1 16rem;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.postman-btn:hover {
+  border-color: #ff6c37;
+  background: rgba(255, 108, 55, 0.06);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.postman-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.postman-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+}
+.postman-btn-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.postman-btn-text strong { font-size: 0.95rem; }
+.postman-btn-text small {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+.postman-btn-text small code { font-size: 0.95em; }
+.postman-note { font-size: 0.82rem; color: var(--color-muted); margin-bottom: 1.5rem; }
+
 /* Reference tables */
 .table-scroll { overflow-x: auto; margin: 0.75rem 0 1.5rem; }
 .api-table {
@@ -554,6 +752,7 @@ main {
 
 /* ── Footer ──────────────────────────────────────────────────── */
 .site-footer {
+  margin-top: auto;   /* eats the leftover column space — see body */
   border-top: 1px solid var(--color-border);
   padding: 1.25rem 1.5rem;
   text-align: center;
