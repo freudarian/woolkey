@@ -29,6 +29,10 @@ button, input, select, textarea { font-family: inherit; }
   --color-warn:       #e6a817;
   --color-danger:     #e05252;
 
+  /* Buttons and chips outline themselves against the glass with this rather
+     than the structural --color-border, which is too heavy for a control. */
+  --control-line: rgba(255, 255, 255, 0.22);
+
   --radius:    0.5rem;
   --radius-lg: 1rem;
   --shadow:    0 2px 12px rgba(0,0,0,0.4);
@@ -53,6 +57,7 @@ button, input, select, textarea { font-family: inherit; }
   --color-warn:       #b77b00;
   --color-danger:     #c83f3f;
   --shadow:           0 8px 24px rgba(26, 29, 39, 0.08);
+  --control-line:     rgba(22, 26, 36, 0.12);
 }
 
 html { font-size: 16px; }
@@ -162,11 +167,11 @@ body.scenic::after {
 /* Frosted panels. The card is the reading surface, so it keeps a solid-ish
    veil and blurs whatever sheep sit behind it.
 
-   The card is also the one panel that changes size — a long password wraps
-   onto more lines and the card grows under the length slider — and every
-   resize recomputes the blur. The fireflies drift behind the glass, so that
-   backdrop is never static; the photo layers are composited and the card
-   holds its own layer to keep the cost down. */
+   The card holds a fixed width and, now that the output scrolls on one line
+   instead of wrapping, a near-fixed height too — so the blur is rarely
+   recomputed for geometry. It still cannot be cached, because the fireflies
+   drift behind the glass; the photo layers are composited and the card holds
+   its own layer to keep that cost down. */
 body.scenic .card,
 body.scenic .error-page {
   background: var(--panel-bg);
@@ -241,7 +246,7 @@ body.scenic .site-footer {
   align-items: center;
   gap: 0.35rem;
   padding: 0.25rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-line);
   border-radius: 999px;
   background: var(--color-surface);
 }
@@ -285,7 +290,7 @@ main {
 /* ── Mode toggle ─────────────────────────────────────────────── */
 .mode-toggle {
   display: flex;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-line);
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 1.5rem;
@@ -325,9 +330,18 @@ main {
   font-family: 'Courier New', Courier, monospace;
   font-size: 1.05rem;
   letter-spacing: 0.03em;
-  word-break: break-all;
   user-select: text;
   color: var(--color-text);
+  /* One line, always. A 128-character password scrolls sideways inside the
+     box rather than wrapping, which also stops the card growing taller as
+     the length slider moves. min-width:0 is what lets a flex item shrink
+     below its content and scroll at all. */
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 .visibility-btn {
   flex-shrink: 0;
@@ -370,7 +384,7 @@ main {
 .btn-primary:hover { background: var(--color-primary-h); }
 .btn-outline {
   background: transparent;
-  border-color: var(--color-border);
+  border-color: var(--control-line);
   color: var(--color-text);
 }
 .btn-outline:hover { background: var(--color-border); }
@@ -439,11 +453,17 @@ main {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 1.6rem;
 }
 .option-row label { flex: 1; font-size: 0.9rem; cursor: pointer; }
 .option-row input[type="range"] {
-  width: 140px;
+  /* The label also grows, so an even split leaves the slider barely wider
+     than it started. Weighting it 6:1 hands almost all the free space to the
+     control, with a floor to stay draggable on a phone and a ceiling so it
+     does not swallow the row. */
+  flex: 6 1 auto;
+  min-width: 130px;
+  max-width: 320px;
   accent-color: var(--color-primary);
   cursor: pointer;
 }
@@ -470,7 +490,7 @@ main {
   font-size: 0.88rem;
   cursor: pointer;
   padding: 0.3rem 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-line);
   border-radius: var(--radius);
   transition: border-color 0.15s, background 0.15s;
   user-select: none;
@@ -665,7 +685,7 @@ main {
   right: 0.5rem;
   padding: 0.2rem 0.55rem;
   font-size: 0.72rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-line);
   border-radius: 4px;
   background: var(--color-bg);
   color: var(--color-muted);
@@ -806,7 +826,7 @@ main {
   .site-header { align-items: flex-start; }
   .actions { flex-direction: column; }
   .actions .btn { width: 100%; justify-content: center; }
-  .option-row input[type="range"] { width: 100px; }
+  .option-row input[type="range"] { min-width: 110px; }
 
   /* Side by side, the label leaves the control about 135px on a phone —
      enough to not overflow, not enough to read what you typed. Stack them. */
